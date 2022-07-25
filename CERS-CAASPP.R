@@ -8,6 +8,10 @@ library(ggthemes)
 library(googlesheets4)
 
 
+south.monterey <- read_csv(here("data","South_Monterey_county_joint_union_high_school.csv"))
+
+gonzales <- read_csv(here("data","Gonzales District_and_School_Export_File.csv"))
+
 mpusd <- read_csv(here("data","MPUSD_CAASPP_21-22.csv"))
 
 san.ardo <- read_csv(here("data","San_Ardo_All.csv")) 
@@ -552,8 +556,8 @@ studentsss <-     deparse(substitute(students))
   ggsave(here("output",paste0("Salinas City", " ELPAC by School ", Sys.Date(),".png")), width = 12, height = 7)
   
   
-  mpusd %>% 
-      filter(str_detect(DistrictName,"Peninsula")) %>%
+  gonzales %>% 
+      filter(str_detect(DistrictName,"Gon")) %>%
       elpac.school()  
   
   ggsave(here("output",paste0("MPUSD", " ELPAC by School ", Sys.Date(),".png")), width = 12, height = 7)
@@ -653,30 +657,30 @@ studentsss <-     deparse(substitute(students))
   
  ###  All of it ------
   
-  mpusd <- clean.df(mpusd)
+ south.monterey <- clean.df(south.monterey)
   
-  overall.graph(mpusd)
+  overall.graph(south.monterey)
   
-  graph.wrap(mpusd)
+  graph.wrap(south.monterey)
   
-  graph.grid(mpusd)
+  graph.grid(south.monterey)
   
-  save.overall(mpusd)
-  save.wrap(mpusd)
-  save.grid(mpusd)
-  
-  
-  passing.perc(mpusd)
+  save.overall(south.monterey)
+  save.wrap(south.monterey)
+  save.grid(south.monterey)
   
   
-  student.group.size(mpusd)
+  passing.perc(south.monterey)
   
   
-  dfs2(mpusd,White) 
-  dfs2(mpusd,EL) 
-  dfs2(mpusd,Asian) 
-  dfs2(mpusd,Filipino) 
-  dfs2(mpusd,BlackOrAfricanAmerican) 
-  dfs2(mpusd,NativeHawaiianOrOtherPacificIslander) 
-  dfs2(mpusd,HispanicOrLatinoEthnicity) 
+  student.group.size(south.monterey)
+  
+  
+  # dfs2(gonzales,White) 
+   dfs2(south.monterey,EL) 
+  # dfs2(gonzales,Asian) 
+  # dfs2(gonzales,Filipino) 
+  # dfs2(gonzales,BlackOrAfricanAmerican) 
+  # dfs2(gonzales,NativeHawaiianOrOtherPacificIslander) 
+   dfs2(south.monterey,HispanicOrLatinoEthnicity) 
   
