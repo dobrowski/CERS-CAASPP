@@ -21,25 +21,14 @@ sheet <- "https://docs.google.com/spreadsheets/d/1E7x2W-bWkZGenZTPVmlyGSl0LQPfrH
 
 ### Load files -----
 
-san.lucas.23 <- read_csv(here("data", "san lucas" ,"San_Lucas_USD2023.csv"))
 
+alisal.23 <- read_csv(here("data","alisal","ELPI_2023_Estimate.csv"))
+alisal.22 <- read_csv(here("data","Alisal USD - District_and_School_Export_File.7.13.2022.csv"))
+alisal.23.demo <- read_xlsx(here("data","alisal", "Alisal CAASPP_LEA_Student_Demographics_Snapshot_Report_27659610000000_230724131757.xlsx"),
+                            skip = 1)
 
-lagunita.23 <- read_csv(here("data", "lagunita" ,"District_and_School_Export_File LAGUNITA 2023.csv"))
-# lagunita <- read_csv(here("data","LAgunita.csv"))
-
-
-soledad <- read_csv(here("data","Soledad_District_and_School_Export_File.csv"))
-
-south.monterey <- read_csv(here("data","South_Monterey_county_joint_union_high_school.csv"))
 
 gonzales <- read_csv(here("data","Gonzales District_and_School_Export_File.csv"))
-
-mpusd <- read_csv(here("data","MPUSD_CAASPP_21-22.csv"))
-
-
-san.ardo.23 <- read_csv(here("data", "san ardo" ,"sanardoCAASPP_2022_2023_report.csv"))
-san.ardo.22 <- read_csv(here("data","San_Ardo_All.csv")) 
-
 
 
 king.city.23 <- read_delim(here("data","king city","KCUSD_22.23.csv"))
@@ -47,50 +36,89 @@ king.city.22 <- read_csv(here("data","KCUSD.csv"))
 king.city.21 <- read_csv(here("data","KCUSD_20.21.csv")) 
 
 
+lagunita.23 <- read_csv(here("data", "lagunita" ,"District_and_School_Export_File LAGUNITA 2023.csv"))
+# lagunita <- read_csv(here("data","LAgunita.csv"))
 
-salinas.city <- read_csv(here("data","SCESD_District_and_School_Export_File.csv"))
+mpusd <- read_csv(here("data","MPUSD_CAASPP_21-22.csv"))
 
 
-pg <- read_csv(here("data","PGUSD_District_and_School_Export_File_071522.csv"))
+nmc.23 <- read_csv(here("data", "nmc" ,"North_Monterey_County_USD 22-23 CERS.xls - North_Monterey_County_USD.csv"))
+nmc.22 <- read_csv(here("data", "nmc" ,"North_Monterey_County_USD_2021-2022.xlsx - North_Monterey_County_USD_2021-.csv"))
+
+
+pg.22 <- read_csv(here("data","PGUSD_District_and_School_Export_File_071522.csv"))
+pg.23 <- read_csv(here("data", "pg","District_and_School_Export_File (1) (1).csv"))
+pg.23.demo <- read_xlsx(here("data","pg", "CAASPP_LEA_Student_Demographics_Snapshot_Report_27661340000000_230724170206.xlsx"),
+                        skip = 1)
+
+
+salinas.city.23 <- read_csv(here("data","salinas city", "SCESD_CERS_7-19-23.csv"))
+salinas.city.22 <- read_csv(here("data","SCESD_District_and_School_Export_File.csv"))
+salinas.city.23.demo <- read_csv(here("data","salinas city", "CAASPP_LEA_Student_Demographics_Snapshot_Report_27661420000000_230720185006.xlsx - Data.csv"),
+                                 skip = 1)
+
 
 san.antonio <- read_excel(here("data","SAUSDCAASPP2021-22.xlt" ))
-soledad1 <- read_excel(here("data","SUSD CAASPP Results 2022.xlsm"), sheet = 1) %>%
-   mutate( GradeLevelWhenAssessed = factor(GradeLevelWhenAssessed, levels = c("KG",1,2,3,4,5,6,7,8,9,10,11,12)))
-
-soledad2 <- read_excel(here("data","SUSD CAASPP Results 2022.xlsm"), sheet = 2)%>%
-    mutate( GradeLevelWhenAssessed = factor(GradeLevelWhenAssessed, levels = c("KG",1,2,3,4,5,6,7,8,9,10,11,12)))
-
-soledad3 <- read_excel(here("data","SUSD CAASPP Results 2022.xlsm"), sheet = 3)%>%
-    mutate( GradeLevelWhenAssessed = factor(GradeLevelWhenAssessed, levels = c("KG",1,2,3,4,5,6,7,8,9,10,11,12)))
-
-# soledad4 <- read_excel(here("data","SUSD CAASPP Results 2022.xlsm"), sheet = 4)
-soledad5 <- read_excel(here("data","SUSD CAASPP Results 2022.xlsm"), sheet = 5) %>%
-    mutate( GradeLevelWhenAssessed = factor(GradeLevelWhenAssessed, levels = c("KG",1,2,3,4,5,6,7,8,9,10,11,12)))
 
 
-soledad <- bind_rows(soledad1,soledad2, soledad3,soledad5) %>%
-    mutate( GradeLevelWhenAssessed = recode_factor( GradeLevelWhenAssessed,
-                                                    "KG"= "KG",
-                                                    "1" = "01",
-                                                    "2" = "02",
-                                                    "3" = "03",
-                                                    "4" = "04",
-                                                    "5" = "05",
-                                                    "6" = "06",
-                                                    "7" = "07",
-                                                    "8" = "08",
-                                                    "9" = "09")) 
-
+san.ardo.23 <- read_csv(here("data", "san ardo" ,"sanardoCAASPP_2022_2023_report.csv"))
+san.ardo.22 <- read_csv(here("data","San_Ardo_All.csv")) 
+san.ardo.23.demo <- read_xlsx(here("data","san ardo", "CAASPP_LEA_Student_Demographics_Snapshot_Report_27661750000000_230726183447.xlsx"),
+                        skip = 1)
 
 
 
 san.lucas.22 <- read_csv(here("data","San_Lucas_District_and_School_Export_File.csv")) 
-
-alisal <- read_csv(here("data","Alisal USD - District_and_School_Export_File.7.13.2022.csv"))
-
+san.lucas.23 <- read_csv(here("data", "san lucas" ,"San_Lucas_USD2023.csv"))
 
 
 santa.rita <- read_csv(here("data","Santa_Rita_District_and_School_Export_File CAASP assessments 2021-2022.csv"))
+
+
+soledad.22 <- read_csv(here("data","Soledad_District_and_School_Export_File.csv"))
+soledad.23 <- read_csv(here("data","soledad","Soledad_Unified.csv"))
+soledad.23.demo <- read_xlsx(here("data","soledad", "CAASPP_LEA_Student_Demographics_Snapshot_Report_27754400000000_230724172438.xlsx"),
+                             skip = 1)
+
+
+south.monterey <- read_csv(here("data","South_Monterey_county_joint_union_high_school.csv"))
+
+
+spreckels.23 <- read_csv(here("data", "spreckels" ,"SBAC 202223.csv"))
+spreckels.22 <- read_csv(here("data", "spreckels" ,"SBAC 202122.csv"))
+spreckels.23.demo <- read_xlsx(here("data","spreckels", "CAASPP_LEA_Student_Demographics_Snapshot_Report_27662250000000_230725165207.xlsx"),
+                               skip = 1)
+
+
+
+# soledad1 <- read_excel(here("data","SUSD CAASPP Results 2022.xlsm"), sheet = 1) %>%
+#    mutate( GradeLevelWhenAssessed = factor(GradeLevelWhenAssessed, levels = c("KG",1,2,3,4,5,6,7,8,9,10,11,12)))
+# 
+# soledad2 <- read_excel(here("data","SUSD CAASPP Results 2022.xlsm"), sheet = 2)%>%
+#     mutate( GradeLevelWhenAssessed = factor(GradeLevelWhenAssessed, levels = c("KG",1,2,3,4,5,6,7,8,9,10,11,12)))
+# 
+# soledad3 <- read_excel(here("data","SUSD CAASPP Results 2022.xlsm"), sheet = 3)%>%
+#     mutate( GradeLevelWhenAssessed = factor(GradeLevelWhenAssessed, levels = c("KG",1,2,3,4,5,6,7,8,9,10,11,12)))
+# 
+# # soledad4 <- read_excel(here("data","SUSD CAASPP Results 2022.xlsm"), sheet = 4)
+# soledad5 <- read_excel(here("data","SUSD CAASPP Results 2022.xlsm"), sheet = 5) %>%
+#     mutate( GradeLevelWhenAssessed = factor(GradeLevelWhenAssessed, levels = c("KG",1,2,3,4,5,6,7,8,9,10,11,12)))
+# 
+# 
+# soledad <- bind_rows(soledad1,soledad2, soledad3,soledad5) %>%
+#     mutate( GradeLevelWhenAssessed = recode_factor( GradeLevelWhenAssessed,
+#                                                     "KG"= "KG",
+#                                                     "1" = "01",
+#                                                     "2" = "02",
+#                                                     "3" = "03",
+#                                                     "4" = "04",
+#                                                     "5" = "05",
+#                                                     "6" = "06",
+#                                                     "7" = "07",
+#                                                     "8" = "08",
+#                                                     "9" = "09")) 
+
+
 
 ### Reference -------
 
@@ -345,7 +373,7 @@ hold
 
 passing.perc(santa.rita)
 
-san.lucas %>%
+salinas.city.23 %>%
     filter(SWD == "Yes") %>%
     passing.perc()
     
@@ -353,7 +381,7 @@ san.lucas %>%
 
 ### Distance from Standard ------
 
-# Caluclates distance from standard for All students 
+# Calculates distance from standard for All students 
 
 dfs <- function(df) {
     
@@ -395,9 +423,11 @@ dfs(santa.rita)
 #         mutate(EL = ifelse(EnglishLanguageAcquisitionStatus == "EL", "Yes", NA)) %>%
          filter(Subject %in% c("ELA", "Math")) %>%
          group_by(Subject) %>%
-         summarise( across(c(HispanicOrLatinoEthnicity:Filipino,EL), ~  sum(!is.na(.)))) %>%
-         pivot_longer(cols = c(HispanicOrLatinoEthnicity:Filipino,EL)) %>%
-     filter(value >= 30)
+         # summarise( across(c(HispanicOrLatinoEthnicity:Filipino,EL), ~  sum(!is.na(.)))) %>%
+         # pivot_longer(cols = c(HispanicOrLatinoEthnicity:Filipino,EL)) %>%
+         summarise( across(c(HispanicOrLatinoEthnicity:ELdash), ~  sum(!is.na(.)))) %>%
+         pivot_longer(cols = c(HispanicOrLatinoEthnicity:ELdash)) %>%
+     filter(value >= 30 | name == "HOM" & value >= 15)
  }
 
  
@@ -483,6 +513,39 @@ studentsss <-     deparse(substitute(students))
   dfs2(king.city,White) 
   dfs2(king.city,EL) 
   dfs2(king.city, HispanicOrLatinoEthnicity)
+  
+  ### Student Growth in Year ----
+  
+  student.growth <- function(df.old, df.new, filename) {
+      
+      ddff <-     deparse(substitute(df.new)) 
+      
+      
+      temp.new <- df.new %>%
+          filter(Subject %in% c("ELA","Math"),
+                 GradeLevelWhenAssessed != "11" ,
+                 GradeLevelWhenAssessed != "03") %>% 
+          select(StudentIdentifier, SchoolName, GradeLevelWhenAssessed, FirstName, LastOrSurname, Subject, ScaleScore.new = ScaleScore, HispanicOrLatinoEthnicity:ELdash) 
+     
+           temp.old <- df.old %>%
+          filter(Subject %in% c("ELA","Math")) %>% 
+          select(StudentIdentifier, Subject, ScaleScore.old = ScaleScore) 
+                                  
+      
+      temp.join <- left_join(temp.new,temp.old) %>%
+          # na.omit() %>%
+           mutate(ScaleScore.change = as.numeric(ScaleScore.new) - as.numeric(ScaleScore.old),
+          )
+      
+      write_csv(temp.join, here(paste0(filename,".csv")))
+      
+      temp.join
+
+      
+  }
+  
+  
+temp <-   student.growth(pg.22,pg.23, "Pacific Grover 2023 Student Scale Score Change")
   
   
   
@@ -677,6 +740,7 @@ studentsss <-     deparse(substitute(students))
  elpi.change("San Ardo", san.ardo.22, san.ardo.23, "San Ardo ELPI 2023")
  
  
+ elpi.change("San Ardo", san.ardo.22, san.ardo.23, "San Ardo ELPI 2023")
  
   
  # alisal.elpac.21  <-  read_excel(here("data","ELPAC_for_ELPI_-_20_to_21_(Alisal_USD)_2020-21.xlsx") ) 
@@ -709,12 +773,12 @@ studentsss <-     deparse(substitute(students))
 ### ELPI by School calculations ----
  
  
- school.list <- unique(king.city.23$SchoolName)
+ school.list <- unique(alisal.23$SchoolName)
  
  for (i in school.list) {
-     elpi.change("King City",
-                 king.city.22,
-                 king.city.23 %>%
+     elpi.change("Alisal",
+                 alisal.22,
+                 alisal.23 %>%
                      filter(str_detect(SchoolName,i)),
                  i)
      
@@ -735,39 +799,86 @@ studentsss <-     deparse(substitute(students))
      filter(GradeLevelWhenAssessed %in% c("03","04","05","06"))
  
  
+ ### Add demo -----
+ 
+ 
+ add.demo <- function(df, df.demo) {
+     
+temp <- df.demo %>%
+     select(StudentIdentifier = `Statewide Student Identifier (SSID)`,
+            Gender,
+            EL2 = `English Learner (EL)`,
+            ELexit = `EL Exit Date`,
+            SWD = `CALPADS Special Education`,
+            SED = `CALPADS Socioeconomically Disadvantage (SED) Status`,
+            HOM = `Homeless Status`) %>%
+     mutate(ELdash = case_when(EL2 == "Yes" ~ "Yes",
+                               ymd(ELexit) >= ymd("2019-06-15") ~ "Yes",
+                               TRUE ~ "No"),
+            StudentIdentifier = as.numeric(StudentIdentifier)
+            ) %>%
+                select(-EL2,-ELexit) %>%
+    mutate(across(Gender:ELdash, ~na_if(., "No")))
+ 
+ 
+ df %>%
+     left_join(temp)
+ 
+ } 
+ 
+ 
+ 
+ spreckels.22 <- clean.df(spreckels.22) 
+ spreckels.23 <- clean.df(spreckels.23) 
+ spreckels.23 <-  add.demo(spreckels.23, spreckels.23.demo)
+
+
+ss23demo<- soledad.23.demo %>%
+    mutate(`Statewide Student Identifier (SSID)` = SSID)
+
+temp <-  add.demo(soledad, ss23demo)
  
  
  ###  All of it ------
   
- san.lucas.23 <- clean.df(san.lucas.23)
-  
+
+san.ardo.22 <- clean.df(san.ardo.22) 
+san.ardo.23 <- clean.df(san.ardo.23) 
+san.ardo.23 <-  add.demo(san.ardo.23, san.ardo.23.demo)
+
+
   overall.graph(san.ardo.23)
   
   graph.wrap(san.ardo.23)
   
   graph.grid(san.ardo.23)
   
-  save.overall(san.ardo.23)
-  save.wrap(san.ardo.23)
-  save.grid(san.ardo.23)
+  save.overall(soledad.23)
+  save.wrap(soledad.23)
+  save.grid(soledad.23)
   
+  
+  elpi.change("Soledad", soledad.22, soledad.23, "Soledad ELPI 2023")
   
   passing.perc(san.ardo.23)
   
   
-  dfs(san.ardo.23)
+  dfs(soledad.23)
   
   student.group.size(san.ardo.23)
   
   
-   dfs2(king.city.23,White) 
-   dfs2(san.ardo.23,EL) 
-  # dfs2(gonzales,Asian) 
-  # dfs2(gonzales,Filipino) 
+ #  dfs2(soledad.23,White) 
+   dfs2(san.ardo.23,ELdash) 
+  # dfs2(pg.23,Asian) 
+   # dfs2(alisal.23,Filipino) 
   # dfs2(gonzales,BlackOrAfricanAmerican) 
   # dfs2(gonzales,NativeHawaiianOrOtherPacificIslander) 
    dfs2(san.ardo.23,HispanicOrLatinoEthnicity) 
-  
+#   dfs2(soledad.23,SWD) 
+   dfs2(san.ardo.23,SED) 
+#   dfs2(soledad.23,HOM) 
+   
 
    
  ### By school in a district -------  
@@ -831,11 +942,11 @@ soledad2 %>%
    
 
    
-   mpusd2 <-  mpusd %>%
-       filter(str_detect(DistrictName,"Penin")) 
+   school.split <-  soledad.23 %>%
+       filter(str_detect(DistrictName,"Soledad")) 
    
-   mpusd2 %>%
-       split(mpusd2$SchoolName) %>%
+   school.split %>%
+       split(school.split$SchoolName) %>%
        map(~graph.wrap2(.))
    
 ### By demo split -------
