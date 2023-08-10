@@ -28,13 +28,25 @@ alisal.23.demo <- read_xlsx(here("data","alisal", "Alisal CAASPP_LEA_Student_Dem
                             skip = 1)
 
 
-gonzales <- read_csv(here("data","Gonzales District_and_School_Export_File.csv"))
+gonzales.23 <- read_csv(here("data","gonz","Gonzales2023.csv"))
+gonzales.22 <- read_csv(here("data","Gonzales District_and_School_Export_File.csv"))
 
 
 king.city.23 <- read_delim(here("data","king city","KCUSD_22.23.csv"))
 king.city.22 <- read_csv(here("data","KCUSD.csv")) 
 king.city.21 <- read_csv(here("data","KCUSD_20.21.csv")) 
-
+king.city.23.demo <- read_xlsx(here("data","king city", "27660500000000_CAASPP_Student_Score_Data_File_TestedStudentScoreData_2023.xlsx"),
+                          skip = 1)
+king.city.23.demo <- king.city.23.demo %>%
+    select(`Statewide Student Identifier (SSID)` = SSID,
+           Gender,
+           `CALPADS Special Education`= CALPADSIDEAIndicator,
+           `English Learner (EL)` = ELStatus,
+           `EL Exit Date` = RFEPDate,
+           `Homeless Status` = HomelessStatus,
+           `CALPADS Socioeconomically Disadvantage (SED) Status` = EconomicDisadvantageStatus
+    ) %>%
+    distinct()
 
 lagunita.23 <- read_csv(here("data", "lagunita" ,"District_and_School_Export_File LAGUNITA 2023.csv"))
 # lagunita <- read_csv(here("data","LAgunita.csv"))
@@ -44,7 +56,18 @@ mpusd <- read_csv(here("data","MPUSD_CAASPP_21-22.csv"))
 
 nmc.23 <- read_csv(here("data", "nmc" ,"North_Monterey_County_USD 22-23 CERS.xls - North_Monterey_County_USD.csv"))
 nmc.22 <- read_csv(here("data", "nmc" ,"North_Monterey_County_USD_2021-2022.xlsx - North_Monterey_County_USD_2021-.csv"))
-
+nmc.23.demo <- read_csv(here("data","nmc", "27738250000000_CAASPP_Student_Score_Data_File_EnrolledStudentScoreData_2023.csv"),
+                                 skip = 1)
+nmc.23.demo <- nmc.23.demo %>%
+    select(`Statewide Student Identifier (SSID)` = SSID,
+           Gender,
+           `CALPADS Special Education`= CALPADSIDEAIndicator,
+           `English Learner (EL)` = ELStatus,
+           `EL Exit Date` = RFEPDate,
+           `Homeless Status` = HomelessStatus,
+           `CALPADS Socioeconomically Disadvantage (SED) Status` = EconomicDisadvantageStatus
+           ) %>%
+    distinct()
 
 pg.22 <- read_csv(here("data","PGUSD_District_and_School_Export_File_071522.csv"))
 pg.23 <- read_csv(here("data", "pg","District_and_School_Export_File (1) (1).csv"))
@@ -88,6 +111,22 @@ spreckels.23 <- read_csv(here("data", "spreckels" ,"SBAC 202223.csv"))
 spreckels.22 <- read_csv(here("data", "spreckels" ,"SBAC 202122.csv"))
 spreckels.23.demo <- read_xlsx(here("data","spreckels", "CAASPP_LEA_Student_Demographics_Snapshot_Report_27662250000000_230725165207.xlsx"),
                                skip = 1)
+
+
+wash.23 <- read_csv(here("data", "washington" ,"WUS CAASPP 2022-23.csv"))
+wash.22 <- read_csv(here("data", "washington" ,"District_and_School_Export_File2022.csv"))
+wash.23.demo <- read_xlsx(here("data","washington", "Copy of 27662330000000_CAASPP_Student_Score_Data_File_TestedStudentScoreData_2023.xlsx"),
+                        skip = 1)
+wash.23.demo <- wash.23.demo %>%
+    select(`Statewide Student Identifier (SSID)` = SSID,
+           Gender,
+           `CALPADS Special Education`= CALPADSIDEAIndicator,
+           `English Learner (EL)` = ELStatus,
+           `EL Exit Date` = RFEPDate,
+           `Homeless Status` = HomelessStatus,
+           `CALPADS Socioeconomically Disadvantage (SED) Status` = EconomicDisadvantageStatus
+    ) %>%
+    distinct()
 
 
 
@@ -216,7 +255,8 @@ overall.graph <- function(df) {
                       aes(label = ..count..), 
                       position = position_stack(vjust = 0.5), size = 2) +
         theme_hc() +
-        scale_fill_brewer() + 
+        scale_fill_brewer() +
+        guides(fill = guide_legend(reverse = TRUE)) + 
         labs(y = "",
              x = "",
              fill = "Achievement Level",
@@ -234,13 +274,13 @@ graph.wrap <- function(df) {
 df %>% 
     mutate(ScaleScoreAchievementLevel = factor(ScaleScoreAchievementLevel),
            GradeLevelWhenAssessed = factor(GradeLevelWhenAssessed, levels = c("KG",1,2,3,4,5,6,7,8,11)),
-           AssessmentName = case_when(AssessmentName == "Kindergarten ELPAC Summative" ~ "Grade  KG ELPAC Summative",
+           AssessmentName = case_when(AssessmentName == "Kindergarten Summative ELPAC" ~ "Grade  KG Summative ELPAC",
                                       AssessmentName == "Grade 11 ELA Summative" ~ "Grade11 ELA Summative",
                                       AssessmentName == "Grade 11 Math Summative" ~ "Grade11 Math Summative",
-                                      AssessmentName == "Grade 10 ELPAC Summative" ~ "Grade10 ELPAC Summative",
-                                      AssessmentName == "Grade 11 ELPAC Summative" ~ "Grade11 ELPAC Summative",
-                                      AssessmentName == "Grade 12 ELPAC Summative" ~ "Grade12 ELPAC Summative",
-                                    TRUE ~AssessmentName)
+                                      AssessmentName == "Grade 10 Summative ELPAC" ~ "Grade10 Summative ELPAC",
+                                      AssessmentName == "Grade 11 Summative ELPAC" ~ "Grade11 Summative ELPAC",
+                                      AssessmentName == "Grade 12 Summative ELPAC" ~ "Grade12 Summative ELPAC",
+                                      TRUE ~AssessmentName)
     ) %>%
     ggplot( aes( y = AssessmentName, fill = ScaleScoreAchievementLevel)) +
     geom_bar(color = "black") +
@@ -252,7 +292,8 @@ df %>%
                   position = position_stack(vjust = 0.5), size = 2) +
     # coord_flip() +
     theme_hc() +
-    scale_fill_brewer() + 
+    scale_fill_brewer() +
+        guides(fill = guide_legend(reverse = TRUE)) + 
     labs(y = "",
          x = "",
          fill = "Achievement Level",
@@ -266,12 +307,12 @@ graph.grid <- function(df) {
     df %>% 
         mutate(ScaleScoreAchievementLevel = factor(ScaleScoreAchievementLevel),
                GradeLevelWhenAssessed2 = factor(GradeLevelWhenAssessed, levels = c("KG",1,2,3,4,5,6,7,8,11)),
-               AssessmentName = case_when(AssessmentName == "Kindergarten ELPAC Summative" ~ "Grade  KG ELPAC Summative",
+               AssessmentName = case_when(AssessmentName == "Kindergarten Summative ELPAC" ~ "Grade  KG Summative ELPAC",
                                           AssessmentName == "Grade 11 ELA Summative" ~ "Grade11 ELA Summative",
                                           AssessmentName == "Grade 11 Math Summative" ~ "Grade11 Math Summative",
-                                          AssessmentName == "Grade 10 ELPAC Summative" ~ "Grade10 ELPAC Summative",
-                                          AssessmentName == "Grade 11 ELPAC Summative" ~ "Grade11 ELPAC Summative",
-                                          AssessmentName == "Grade 12 ELPAC Summative" ~ "Grade12 ELPAC Summative",
+                                          AssessmentName == "Grade 10 Summative ELPAC" ~ "Grade10 Summative ELPAC",
+                                          AssessmentName == "Grade 11 Summative ELPAC" ~ "Grade11 Summative ELPAC",
+                                          AssessmentName == "Grade 12 Summative ELPAC" ~ "Grade12 Summative ELPAC",
                                           TRUE ~AssessmentName)
         ) %>%
         ggplot( aes( y = AssessmentName, fill = ScaleScoreAchievementLevel)) +
@@ -283,7 +324,8 @@ graph.grid <- function(df) {
                       aes(label = ..count..), 
                       position = position_stack(vjust = 0.5), size = 2) +
         theme_hc() +
-        scale_fill_brewer() + 
+        scale_fill_brewer() +
+        guides(fill = guide_legend(reverse = TRUE)) + 
         labs(y = "",
              x = "",
              fill = "Achievement Level",
@@ -371,12 +413,32 @@ hold
 }
 
 
+
+
 passing.perc(santa.rita)
 
 salinas.city.23 %>%
     filter(SWD == "Yes") %>%
     passing.perc()
     
+
+temp <- soledad.23 %>%
+    group_by(Subject, GradeLevelWhenAssessed) %>%
+    transmute(Level1perc = 100*mean(ifelse(ScaleScoreAchievementLevel == 1, TRUE, FALSE)),
+              Level2perc = 100*mean(ifelse(ScaleScoreAchievementLevel == 2, TRUE, FALSE)),
+              Level3perc = 100*mean(ifelse(ScaleScoreAchievementLevel == 3, TRUE, FALSE)),
+              Level4perc = 100*mean(ifelse(ScaleScoreAchievementLevel == 4, TRUE, FALSE)),
+              MeetOrExceedperc = 100*mean(ifelse(ScaleScoreAchievementLevel >= 3, TRUE, FALSE)),
+  #            Above = ifelse(ScaleScoreAchievementLevel >= 3, TRUE, FALSE),
+   #        perc = mean(Above)*100
+           ) %>%
+#    select(Subject, GradeLevelWhenAssessed, perc) %>%
+    distinct()
+
+temp
+
+write_csv(temp, "Soledad Percent Met by Grade Level.csv")
+
 
 
 ### Distance from Standard ------
@@ -484,35 +546,6 @@ studentsss <-     deparse(substitute(students))
   dfs2(santa.rita,EL) 
  dfs2(santa.rita, HispanicOrLatinoEthnicity)
  
-  dfs2(alisal,White) 
-  dfs2(alisal,EL) 
-     dfs2(alisal, HispanicOrLatinoEthnicity)
-  dfs2(alisal,Filipino) 
-  
-  dfs2(san.antonio,White) 
-  dfs2(san.antonio, HispanicOrLatinoEthnicity)
-  
-  dfs2(san.lucas, HispanicOrLatinoEthnicity)
-  dfs2(san.lucas, SWD)
-  
-  
-  dfs2(pg,White) 
-  dfs2(pg,EL) 
-  dfs2(pg,Asian) 
-  dfs2(pg,HispanicOrLatinoEthnicity) 
-  
-  
-  
-  dfs2(salinas.city,White) 
-  dfs2(salinas.city,EL) 
-  dfs2(salinas.city, HispanicOrLatinoEthnicity)
-  dfs2(salinas.city,Filipino) 
-  
-  
-  
-  dfs2(king.city,White) 
-  dfs2(king.city,EL) 
-  dfs2(king.city, HispanicOrLatinoEthnicity)
   
   ### Student Growth in Year ----
   
@@ -547,7 +580,7 @@ studentsss <-     deparse(substitute(students))
   
 temp <-   student.growth(pg.22,pg.23, "Pacific Grover 2023 Student Scale Score Change")
   
-  
+student.growth(wash.22,wash.23, "Washington 2023 Student Scale Score Change")
   
   ####  ELPAC by School -----
   
@@ -740,8 +773,6 @@ temp <-   student.growth(pg.22,pg.23, "Pacific Grover 2023 Student Scale Score C
  elpi.change("San Ardo", san.ardo.22, san.ardo.23, "San Ardo ELPI 2023")
  
  
- elpi.change("San Ardo", san.ardo.22, san.ardo.23, "San Ardo ELPI 2023")
- 
   
  # alisal.elpac.21  <-  read_excel(here("data","ELPAC_for_ELPI_-_20_to_21_(Alisal_USD)_2020-21.xlsx") ) 
  # alisal.elpac <- read_excel(here("data","ELPAC_for_ELPI_-_21_to_22_(Alisal_USD)_2021-22.xlsx") ) 
@@ -841,43 +872,46 @@ temp <-  add.demo(soledad, ss23demo)
  
  ###  All of it ------
   
-
-san.ardo.22 <- clean.df(san.ardo.22) 
-san.ardo.23 <- clean.df(san.ardo.23) 
-san.ardo.23 <-  add.demo(san.ardo.23, san.ardo.23.demo)
+wash.22 <- wash.22 %>%
+    filter(str_detect( DistrictName, "Washington"))
 
 
-  overall.graph(san.ardo.23)
+wash.22 <- clean.df(wash.22) 
+king.city.23 <- clean.df(king.city.23) 
+king.city.23 <-  add.demo(king.city.23, king.city.23.demo)
+
+
+  overall.graph(king.city.23)
   
-  graph.wrap(san.ardo.23)
+  graph.wrap(king.city.23)
   
-  graph.grid(san.ardo.23)
+  graph.grid(king.city.23)
   
-  save.overall(soledad.23)
-  save.wrap(soledad.23)
-  save.grid(soledad.23)
-  
-  
-  elpi.change("Soledad", soledad.22, soledad.23, "Soledad ELPI 2023")
-  
-  passing.perc(san.ardo.23)
-  
-  
-  dfs(soledad.23)
-  
-  student.group.size(san.ardo.23)
+  save.overall(king.city.23)
+  save.wrap(king.city.23)
+  save.grid(king.city.23)
   
   
- #  dfs2(soledad.23,White) 
-   dfs2(san.ardo.23,ELdash) 
-  # dfs2(pg.23,Asian) 
+  elpi.change("Washington", wash.22, wash.23, "Washington ELPI 2023")
+  
+  passing.perc(king.city.23)
+  
+  
+  dfs(king.city.23)
+  
+  student.group.size(king.city.23)
+  
+  
+   dfs2(king.city.23,White) 
+   dfs2(king.city.23,ELdash) 
+  # dfs2(wash.23,Asian) 
    # dfs2(alisal.23,Filipino) 
   # dfs2(gonzales,BlackOrAfricanAmerican) 
   # dfs2(gonzales,NativeHawaiianOrOtherPacificIslander) 
-   dfs2(san.ardo.23,HispanicOrLatinoEthnicity) 
-#   dfs2(soledad.23,SWD) 
-   dfs2(san.ardo.23,SED) 
-#   dfs2(soledad.23,HOM) 
+   dfs2(king.city.23,HispanicOrLatinoEthnicity) 
+   dfs2(king.city.23,SWD) 
+   dfs2(king.city.23,SED) 
+   dfs2(king.city.23,HOM) 
    
 
    
@@ -909,12 +943,12 @@ soledad2 %>%
        df %>% 
            mutate(ScaleScoreAchievementLevel = factor(ScaleScoreAchievementLevel),
                   GradeLevelWhenAssessed = factor(GradeLevelWhenAssessed, levels = c("KG",1,2,3,4,5,6,7,8,11)),
-                  AssessmentName = case_when(AssessmentName == "Kindergarten ELPAC Summative" ~ "Grade  KG ELPAC Summative",
+                  AssessmentName = case_when(AssessmentName == "Kindergarten Summative ELPAC" ~ "Grade  KG Summative ELPAC",
                                              AssessmentName == "Grade 11 ELA Summative" ~ "Grade11 ELA Summative",
                                              AssessmentName == "Grade 11 Math Summative" ~ "Grade11 Math Summative",
-                                             AssessmentName == "Grade 10 ELPAC Summative" ~ "Grade10 ELPAC Summative",
-                                             AssessmentName == "Grade 11 ELPAC Summative" ~ "Grade11 ELPAC Summative",
-                                             AssessmentName == "Grade 12 ELPAC Summative" ~ "Grade12 ELPAC Summative",
+                                             AssessmentName == "Grade 10 Summative ELPAC" ~ "Grade10 Summative ELPAC",
+                                             AssessmentName == "Grade 11 Summative ELPAC" ~ "Grade11 Summative ELPAC",
+                                             AssessmentName == "Grade 12 Summative ELPAC" ~ "Grade12 Summative ELPAC",
                                              TRUE ~AssessmentName)
            ) %>%
            ggplot( aes( y = AssessmentName, fill = ScaleScoreAchievementLevel)) +
@@ -927,7 +961,8 @@ soledad2 %>%
                          position = position_stack(vjust = 0.5), size = 2) +
            # coord_flip() +
            theme_hc() +
-           scale_fill_brewer() + 
+           scale_fill_brewer() +
+           guides(fill = guide_legend(reverse = TRUE)) + 
            labs(y = "",
                 x = "",
                 fill = "Achievement Level",
@@ -942,8 +977,8 @@ soledad2 %>%
    
 
    
-   school.split <-  soledad.23 %>%
-       filter(str_detect(DistrictName,"Soledad")) 
+   school.split <-  king.city.23 %>%
+       filter(str_detect(DistrictName,"King City")) 
    
    school.split %>%
        split(school.split$SchoolName) %>%
