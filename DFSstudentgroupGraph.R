@@ -59,7 +59,6 @@ library(MCOE)
 library(here)
 library(ggthemes)
 library(vroom)
-library(ggrepel)
 
 
 con <- mcoe_sql_con()
@@ -156,6 +155,217 @@ work.group <-   working %>%
 
 
 
-dfs.comp(dist = "king.city.23",
+dfs.comp(dist = "wash.23",
           assessment = "ELA",
-          dist.name = "King City")
+          dist.name = "Washington")
+
+
+
+
+
+dfs.graph(dist = "wash.23",
+          assessment = "ELA",
+          dist.name = "Washington")
+
+
+
+#### School level versions -------
+
+
+
+dash.school <- function(cdsCode) {
+    
+    tbl(con,"DASH_ALL_2022") %>%
+    filter(countyname == "Monterey",
+           cds == cdsCode,
+           rtype == "S",
+           indicator == "ela" | indicator == "math") %>%
+    collect()  %>%
+    mutate(Group = case_match(studentgroup,
+                              "HOM" ~ "Homeless",
+                              "SWD" ~ "Students with \nDisabilities",
+                              "SED" ~ "Socio-Economically \nDisadvantaged",
+                              "HI" ~ "Latino",
+                              "EL" ~ "English Learner",
+                              "AS" ~ "Asian",
+                              "FI" ~ "Filipino",
+                              "WH" ~ "White",
+                              .default = studentgroup
+    ))
+
+}
+    
+temp <- dash.school(school.list[12])
+
+
+
+
+    
+dfs.comp.school <- function(df, cds, assessment = "ELA" ) {
+    
+    
+    ent <- tbl(con,"SCHOOLS") %>%
+        filter(
+            CDSCode == cds
+    #        County == "Monterey"
+        ) %>%
+        collect()  %>%
+        select(EILName) %>%
+        simplify()
+    
+    print(ent)
+    
+    
+    work.group <-   df %>%
+        filter(CDS == cds,
+               Test == assessment,
+               count >= 30) %>%
+        select(Group) %>%
+        unique() %>%
+        flatten()
+    
+    ass2 <- str_to_lower(assessment)
+
+    dash2 <- dash.school( cds ) %>%
+        filter(# str_detect(districtname, dist.name),
+               indicator == ass2,
+               Group %in% work.group
+        ) %>%
+        select(districtname, indicator, currstatus, Group) %>%
+        mutate(EstimatedColor = "Light Gray") %>%
+        rename(DFS = currstatus)
+    
+
+
+    df %>%
+        filter(CDS == cds,
+               Test == assessment,
+               count >= 30) %>%
+        mutate(DFS = as.numeric(DFS)) %>%
+        left_join(dash2, by = c("Group")) %>%
+        mutate(change = DFS.x - DFS.y,
+               EstimatedColor = case_when(
+                                        # High Schools
+                                          str_detect(ent,"High School") & Test == "ELA" & DFS.x <=-45.1 & change <= 2.9 ~ "Red",
+                                          str_detect(ent,"High School") & Test == "ELA" & DFS.x <=-45.1 & change >= 3.0 ~ "Orange",
+                                          str_detect(ent,"High School") & Test == "ELA" & DFS.x <=-0.1 & change <= 2.9 ~ "Orange",
+                                          str_detect(ent,"High School") & Test == "ELA" & DFS.x <=-0.1 & change >= 3.0 ~ "Yellow",    
+                                          str_detect(ent,"High School") & Test == "ELA" & DFS.x <=29.9 & change <= 2.9 ~ "Yellow",
+                                          str_detect(ent,"High School") & Test == "ELA" & DFS.x <=29.9 & change >= 3.0 ~ "Green",
+                                          str_detect(ent,"High School") & Test == "ELA" & DFS.x <=74.9 & change <= 14.9 ~ "Green",
+                                          str_detect(ent,"High School") & Test == "ELA" & DFS.x <=74.9 & change >= 15.0 ~ "Blue",           
+                                          str_detect(ent,"High School") & Test == "ELA" & DFS.x >=75.0 & change <= -3.0 ~ "Green",
+                                          str_detect(ent,"High School") & Test == "ELA" & DFS.x >=75.0 & change  >= -3.0 ~ "Blue",
+                                          
+                                          str_detect(ent,"High School") & Test == "Math" & DFS.x <=-115.1 & change <= 2.9 ~ "Red",
+                                          str_detect(ent,"High School") & Test == "Math" & DFS.x <=-115.1 & change >= 3.0 ~ "Orange",
+                                          str_detect(ent,"High School") & Test == "Math" & DFS.x <=-60.1 & change <= 2.9 ~ "Orange",
+                                          str_detect(ent,"High School") & Test == "Math" & DFS.x <=-60.1 & change >= 3.0 ~ "Yellow",    
+                                          str_detect(ent,"High School") & Test == "Math" & DFS.x <=-0.1 & change <= 2.9 ~ "Yellow",
+                                          str_detect(ent,"High School") & Test == "Math" & DFS.x <=-0.1 & change >= 3.0 ~ "Green",
+                                          str_detect(ent,"High School") & Test == "Math" & DFS.x <=24.9 & change <= 14.9 ~ "Green",
+                                          str_detect(ent,"High School") & Test == "Math" & DFS.x <=24.9 & change >= 15.0 ~ "Blue",           
+                                          str_detect(ent,"High School") & Test == "Math" & DFS.x >=25.0 & change <= -3.0 ~ "Green",
+                                          str_detect(ent,"High School") & Test == "Math" & DFS.x >=25.0 & change  >= -3.0 ~ "Blue",
+                                          
+                                          # Not High Schools
+                                          
+                                          Test == "ELA" & DFS.x <=-70.1 & change <= 2.9 ~ "Red",
+                                          Test == "ELA" & DFS.x <=-70.1 & change >= 3.0 ~ "Orange",
+                                          Test == "ELA" & DFS.x <=-5.1 & change <= 2.9 ~ "Orange",
+                                          Test == "ELA" & DFS.x <=-5.1 & change >= 3.0 ~ "Yellow",    
+                                          Test == "ELA" & DFS.x <=9.9 & change <= 2.9 ~ "Yellow",
+                                          Test == "ELA" & DFS.x <=9.9 & change >= 3.0 ~ "Green",
+                                          Test == "ELA" & DFS.x <=44.9 & change <= 14.9 ~ "Green",
+                                          Test == "ELA" & DFS.x <=44.9 & change >= 15.0 ~ "Blue",           
+                                          Test == "ELA" & DFS.x >=45.0 & change <= -3.0 ~ "Green",
+                                          Test == "ELA" & DFS.x >=45.0 & change  >= -3.0 ~ "Blue",
+                                          
+                                          Test == "Math" & DFS.x <=-95.1 & change <= 2.9 ~ "Red",
+                                          Test == "Math" & DFS.x <=-95.1 & change >= 3.0 ~ "Orange",
+                                          Test == "Math" & DFS.x <=-25.1 & change <= 2.9 ~ "Orange",
+                                          Test == "Math" & DFS.x <=-25.1 & change >= 3.0 ~ "Yellow",    
+                                          Test == "Math" & DFS.x <=-0.1 & change <= 2.9 ~ "Yellow",
+                                          Test == "Math" & DFS.x <=-0.1 & change >= 3.0 ~ "Green",
+                                          Test == "Math" & DFS.x <=34.9 & change <= 14.9 ~ "Green",
+                                          Test == "Math" & DFS.x <=34.9 & change >= 15.0 ~ "Blue",           
+                                          Test == "Math" & DFS.x >=35.0 & change <= -3.0 ~ "Green",
+                                          Test == "Math" & DFS.x >=35.0 & change  >= -3.0 ~ "Blue",
+                                          
+
+                                          !is.na(DFS.x) & is.na(DFS.y) ~ "Black",
+                                          
+                                          TRUE ~ EstimatedColor
+                                          
+                                          
+                                          
+                                          
+                                          
+                                          
+                                          
+                                          
+               ),
+               DFS = DFS.x
+        ) %>%
+                                          
+        
+        bind_rows(dash2) %>%
+        mutate(EstimatedColor = factor(EstimatedColor),
+            EstimatedColor = fct_relevel(EstimatedColor,"Light Gray" ) )
+        
+}
+
+
+dfs.comp.school.graph <- function(df) {
+    
+    skul <- df$SchoolName[1]
+    ass <- df$Test[1]
+    
+    df %>%
+        ggplot(aes(x = fct_reorder(Group,DFS), y = DFS)) +
+        geom_col(aes(fill = EstimatedColor,
+                     color = "black"),
+                 position = "dodge2") +
+        mcoe_theme +
+        scale_fill_identity() +
+        scale_color_identity() +
+        labs(y = "Distance from Standard",
+             title = paste0(skul, " - ", ass," CAASPP Student Group Results 2023"),
+             subtitle = "Gray is 2022 results and Colored bars are 2023 with the estimated Dashboard color")
+
+
+#    ggsave(here("output",paste0(dist.name, " - ",assessment," CAASPP Student Group Results 2022 and 2023 Comparison ", Sys.Date(),".png")), width = 8, height = 5)
+    
+    
+} 
+
+
+
+temp <- dfs.comp.school(df = holder, cds = 27661592730109, assessment = "ELA")
+
+temp %>% dfs.comp.school.graph()
+
+
+
+dfs.comp.school(df = holder, cds = school.list[9], assessment = "Math") %>% 
+    dfs.comp.school.graph()
+
+
+### Salinas Union ------
+
+school.list <- holder$CDS %>% unique()
+
+
+for (i in 1:12) {
+    
+dfs.comp.school(df = holder, cds = school.list[i], assessment = "Math") %>% 
+    dfs.comp.school.graph()
+    
+    ggsave(here("output",paste0(school.list[i], " - ","Math"," CAASPP Student Group Results 2022 and 2023 Comparison ", Sys.Date(),".png")), width = 8, height = 5)
+    
+    dfs.comp.school(df = holder, cds = school.list[i], assessment = "ELA") %>% 
+        dfs.comp.school.graph()
+    
+    ggsave(here("output",paste0(school.list[i], " - ","ELA"," CAASPP Student Group Results 2022 and 2023 Comparison ", Sys.Date(),".png")), width = 8, height = 5)
+
+}
