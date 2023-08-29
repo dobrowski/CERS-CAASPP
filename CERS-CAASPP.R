@@ -538,7 +538,7 @@ dfs <- function(df) {
 }
 
 
-dfs(santa.rita)
+dfs(salinas.union.23.demo)
 
  
  ### Student Group Size ------
@@ -1076,7 +1076,9 @@ soledad2 %>%
        namer <- unique(df$CALPADSSchoolName)
        coder <- unique(df$CALPADSSchoolCode)
        
-   waiting.room <- dfs2.school(df,White)  %>%
+   waiting.room <- dfs2.school(df %>% mutate(All = "Yes"),All) %>%
+       bind_rows(  
+           dfs2.school(df,White) ) %>%
        bind_rows(  dfs2.school(df,ELdash) ) %>%
    bind_rows( dfs2.school(df,Asian) )  %>%
    bind_rows( dfs2.school(df,Filipino) )  %>%
@@ -1094,7 +1096,7 @@ soledad2 %>%
    }
    
    
-
+   
    school.split <-  king.city.23 %>%
        filter(str_detect(DistrictName,"King City")) 
    
@@ -1104,31 +1106,32 @@ soledad2 %>%
    
    
    
-   
  # Calculate DFS for student groups in district
    
    
-   
+   # Testing add.school.dfs()
    salinas.union.23.demo %>%
        filter(str_detect(CALPADSSchoolName,"Washington")) %>%
        add.school.dfs()
    
 
+   
+   # Use for SUHSD
     school.split <-  salinas.union.23.demo %>%
         filter(str_detect(CALPADSDistrictName,"Salinas Union")) 
    
 
     
-    
+    # USe for King City or others
     school.split <-  king.city.23 %>%
         rename(CALPADSSchoolName = SchoolName,
                CALPADSSchoolCode = SchoolId,
                TwoorMoreRaces = TwoOrMoreRaces) %>%
         filter(str_detect(DistrictName,"King City")) 
    
-      # school.split %>%
-   #     split(school.split$CALPADSSchoolName) %>%
-   #     map(~student.group.size(.))
+
+    
+    # Used as basis for graphing in DFS student group Graph
    
    
 holder <-    school.split %>%
@@ -1147,8 +1150,6 @@ holder <-    school.split %>%
                               .default = students
     ))
   
-   
-   
    
    
 ### By demo split -------
@@ -1306,11 +1307,11 @@ comp.grade.year.meet.exceed(spreckels.22, spreckels.23, "ELA", "Spreckels")
 
 
 
-### NMCUSD ----
+### Calculate by grade level and student group  ----
 
 nmc.23 %>%
     filter(Subject %in% c("ELA","Math")) %>%
-#   filter(SWD == "Yes") %>%    
+   filter(EL == "Yes") %>%    
     group_by(Subject, GradeLevelWhenAssessed) %>%
     mutate(Above = ifelse(ScaleScoreAchievementLevel >= 3, TRUE, FALSE),
            perc = mean(Above)*100) %>%

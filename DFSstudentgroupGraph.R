@@ -4,7 +4,7 @@
 library(googlesheets4)
 library(MCOE)
 
-
+### get from google sheet ----
 working <- read_sheet(ss = sheet,
            sheet = "Distance from Standard Group") %>%
     mutate(Group = case_match(StudentGroup,
@@ -12,11 +12,19 @@ working <- read_sheet(ss = sheet,
                               "SWD" ~ "Students with \nDisabilities",
                               "SED" ~ "Socio-Economically \nDisadvantaged",
                               "HispanicOrLatinoEthnicity" ~ "Latino",
-                              "ELdash" ~ "English Learner",
+                              "ELdash" ~ "English \nLearner",
                               .default = StudentGroup
                               ))
 
+working.plus <- read_sheet(ss = sheet,
+                           sheet = "Distance from Standard") %>%
+    mutate(Group = "All")
 
+working <- working %>%
+    bind_rows(working.plus)
+
+
+### functions ----
 dfs.graph <- function(dist, assessment = "ELA", dist.name ) {
     
 
@@ -24,7 +32,8 @@ working %>%
     filter(District == dist,
            Test == assessment) %>%
     mutate(DFS = as.numeric(DFS)) %>%
-    ggplot(aes(x = fct_reorder(Group,DFS), y = DFS, )) +
+    ggplot(aes(x = Group, y = DFS, )) +
+#    ggplot(aes(x = fct_reorder(Group,DFS), y = DFS, )) +. # To sort by lowest to highest
     geom_col(aes(fill = EstimatedColor, 
                  color = "black")) +
     mcoe_theme +
@@ -40,9 +49,13 @@ ggsave(here("output",paste0(dist.name, " - ",assessment," CAASPP Student Group R
 
 
 dfs.graph(dist = "king.city.23",
-          assessment = "Math",
+          assessment = "ELA",
           dist.name = "King City")
 
+
+dfs.graph(dist = "salinas.union.23.demo",
+          assessment = "Math",
+          dist.name = "Salinas Union")
 
 
 dfs.graph(dist = "nmc.23",
@@ -99,10 +112,11 @@ dash <- tbl(con,"DASH_ALL_2022") %>%
                               "SWD" ~ "Students with \nDisabilities",
                               "SED" ~ "Socio-Economically \nDisadvantaged",
                               "HI" ~ "Latino",
-                              "EL" ~ "English Learner",
+                              "EL" ~ "English \nLearner",
                               "AS" ~ "Asian",
                               "FI" ~ "Filipino",
                               "WH" ~ "White",
+                              "ALL" ~ "All",
                               .default = studentgroup
     ))
 
@@ -137,11 +151,13 @@ work.group <-   working %>%
         bind_rows(dash2) %>%
 
 
-        ggplot(aes(x = fct_reorder(Group,DFS), y = DFS)) +
+        ggplot(aes(x = Group, y = DFS)) +
+ #       ggplot(aes(x = fct_reorder(Group,DFS), y = DFS)) +
         geom_col(aes(fill = EstimatedColor,
                      color = "black"),
                  position = "dodge2") +
         mcoe_theme +
+        {if(length(work.group) >=8 )scale_x_discrete(guide = guide_axis(n.dodge = 2))} + #Fixes the overlapping axis labels to make them alternate if lots of columns
         scale_fill_identity() +
         scale_color_identity() +
         labs(y = "Distance from Standard",
@@ -155,12 +171,14 @@ work.group <-   working %>%
 
 
 
-dfs.comp(dist = "wash.23",
+dfs.comp(dist = "salinas.union.23.demo",
           assessment = "ELA",
-          dist.name = "Washington")
+          dist.name = "Salinas Union")
 
 
-
+dfs.comp(dist = "king.city.23",
+         assessment = "ELA",
+         dist.name = "King City")
 
 
 dfs.graph(dist = "wash.23",
@@ -190,12 +208,13 @@ dash.school <- function(cdsCode) {
                               "AS" ~ "Asian",
                               "FI" ~ "Filipino",
                               "WH" ~ "White",
+                              "ALL" ~ "All",
                               .default = studentgroup
     ))
 
 }
     
-temp <- dash.school(school.list[12])
+temp <- dash.school(school.list[2])
 
 
 
@@ -322,7 +341,8 @@ dfs.comp.school.graph <- function(df) {
     ass <- df$Test[1]
     
     df %>%
-        ggplot(aes(x = fct_reorder(Group,DFS), y = DFS)) +
+        ggplot(aes(x = Group, y = DFS)) +
+#        ggplot(aes(x = fct_reorder(Group,DFS), y = DFS)) +
         geom_col(aes(fill = EstimatedColor,
                      color = "black"),
                  position = "dodge2") +
