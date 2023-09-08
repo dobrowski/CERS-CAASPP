@@ -53,14 +53,14 @@ dfs.graph(dist = "king.city.23",
           dist.name = "King City")
 
 
-dfs.graph(dist = "salinas.union.23.demo",
+dfs.graph(dist = "south.monterey.23.demo",
           assessment = "Math",
-          dist.name = "Salinas Union")
+          dist.name = "South Monterey County")
 
 
-dfs.graph(dist = "nmc.23",
+dfs.graph(dist = "soledad.23",
           assessment = "ELA",
-          dist.name = "North Monterey County")
+          dist.name = "Soledad")
 
 
 ### Comparison to prior year ----
@@ -81,8 +81,10 @@ con <- mcoe_sql_con()
 caaspp.mry <- tbl(con, "CAASPP") %>% 
     filter(County_Code == "27",
            # DistrictCode == "10272",
-           Test_Year >= "2022",
-           Type_ID == 6) %>%
+           Test_Year >= "2019",
+           School_Code == "0000000"
+#           Type_ID == 6
+ ) %>%
     collect() 
 
 
@@ -171,9 +173,9 @@ work.group <-   working %>%
 
 
 
-dfs.comp(dist = "salinas.union.23.demo",
+dfs.comp(dist = "south.monterey.23.demo",
           assessment = "ELA",
-          dist.name = "Salinas Union")
+          dist.name = "South Monterey County")
 
 
 dfs.comp(dist = "king.city.23",
@@ -181,9 +183,9 @@ dfs.comp(dist = "king.city.23",
          dist.name = "King City")
 
 
-dfs.graph(dist = "wash.23",
-          assessment = "ELA",
-          dist.name = "Washington")
+dfs.comp(dist = "soledad.23",
+          assessment = "Math",
+          dist.name = "Soledad")
 
 
 
@@ -220,8 +222,9 @@ temp <- dash.school(school.list[2])
 
 
     
-dfs.comp.school <- function(df, cds, assessment = "ELA" ) {
+dfs.comp.school <- function(df, cds, assessment = "ELA", limit.case.count = TRUE ) {
     
+
     
     ent <- tbl(con,"SCHOOLS") %>%
         filter(
@@ -234,14 +237,22 @@ dfs.comp.school <- function(df, cds, assessment = "ELA" ) {
     
     print(ent)
     
-    
+ 
+       
     work.group <-   df %>%
         filter(CDS == cds,
                Test == assessment,
-               count >= 30) %>%
+    #           count >= 30
+               ) %>%
+        filter(if(limit.case.count == TRUE )count >= 30 else count >= 1) %>%
+   #     {if(limit.case.count == TRUE )filter(count >= 30 ) } %>%
+        ungroup() %>%
         select(Group) %>%
         unique() %>%
         flatten()
+    
+    
+ #   print(work.group)
     
     ass2 <- str_to_lower(assessment)
 
@@ -254,16 +265,22 @@ dfs.comp.school <- function(df, cds, assessment = "ELA" ) {
         mutate(EstimatedColor = "Light Gray") %>%
         rename(DFS = currstatus)
     
-
+    
+    
 
     df %>%
         filter(CDS == cds,
                Test == assessment,
-               count >= 30) %>%
+ #              count >= 30
+               ) %>%
+        filter(if(limit.case.count == TRUE )count >= 30 else count >= 1) %>%
+  #      {if(limit.case.count == TRUE )filter(count >= 30 ) } %>%
         mutate(DFS = as.numeric(DFS)) %>%
         left_join(dash2, by = c("Group")) %>%
         mutate(change = DFS.x - DFS.y,
                EstimatedColor = case_when(
+                                            count < 30 ~ "White",
+                    
                                         # High Schools
                                           str_detect(ent,"High School") & Test == "ELA" & DFS.x <=-45.1 & change <= 2.9 ~ "Red",
                                           str_detect(ent,"High School") & Test == "ELA" & DFS.x <=-45.1 & change >= 3.0 ~ "Orange",
@@ -331,7 +348,10 @@ dfs.comp.school <- function(df, cds, assessment = "ELA" ) {
         bind_rows(dash2) %>%
         mutate(EstimatedColor = factor(EstimatedColor),
             EstimatedColor = fct_relevel(EstimatedColor,"Light Gray" ) )
-        
+    
+    
+    
+    
 }
 
 
@@ -367,7 +387,7 @@ temp %>% dfs.comp.school.graph()
 
 
 
-dfs.comp.school(df = holder, cds = school.list[9], assessment = "Math") %>% 
+temp <- dfs.comp.school(df = holder, cds = school.list[4], assessment = "ELA", limit.case.count = FALSE) %>% 
     dfs.comp.school.graph()
 
 
@@ -376,14 +396,14 @@ dfs.comp.school(df = holder, cds = school.list[9], assessment = "Math") %>%
 school.list <- holder$CDS %>% unique()
 
 
-for (i in 1:12) {
+for (i in 1:9) {
     
-dfs.comp.school(df = holder, cds = school.list[i], assessment = "Math") %>% 
+dfs.comp.school(df = holder, cds = school.list[i], assessment = "Math", limit.case.count = FALSE) %>% 
     dfs.comp.school.graph()
     
     ggsave(here("output",paste0(school.list[i], " - ","Math"," CAASPP Student Group Results 2022 and 2023 Comparison ", Sys.Date(),".png")), width = 8, height = 5)
     
-    dfs.comp.school(df = holder, cds = school.list[i], assessment = "ELA") %>% 
+    dfs.comp.school(df = holder, cds = school.list[i], assessment = "ELA", limit.case.count = FALSE) %>% 
         dfs.comp.school.graph()
     
     ggsave(here("output",paste0(school.list[i], " - ","ELA"," CAASPP Student Group Results 2022 and 2023 Comparison ", Sys.Date(),".png")), width = 8, height = 5)

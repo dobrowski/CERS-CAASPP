@@ -6,6 +6,7 @@ library(readxl)
 library(here)
 library(ggthemes)
 library(googlesheets4)
+library(MCOE)
 
 options(scipen=999)
 
@@ -154,11 +155,77 @@ santa.rita <- read_csv(here("data","Santa_Rita_District_and_School_Export_File C
 
 soledad.22 <- read_csv(here("data","Soledad_District_and_School_Export_File.csv"))
 soledad.23 <- read_csv(here("data","soledad","Soledad_Unified.csv"))
-soledad.23.demo <- read_xlsx(here("data","soledad", "CAASPP_LEA_Student_Demographics_Snapshot_Report_27754400000000_230724172438.xlsx"),
-                             skip = 1)
+soledad.23.demo <- read_delim(here("data","soledad","27754400000000_CAASPP_Student_Score_Data_File_TestedStudentScoreData_2023_DLMTR.CSV"),
+                            delim = "^"
+                            )
+
+soledad.23.demo <- soledad.23.demo %>%
+    select(`Statewide Student Identifier (SSID)` = SSID,
+           Gender,
+           `CALPADS Special Education`= CALPADSIDEAIndicator,
+           `English Learner (EL)` = ELStatus,
+           `EL Exit Date` = RFEPDate,
+           `Homeless Status` = HomelessStatus,
+           `CALPADS Socioeconomically Disadvantage (SED) Status` = EconomicDisadvantageStatus
+    ) %>%
+    distinct()
+
+# soledad.23.demo <- read_xlsx(here("data","soledad", "CAASPP_LEA_Student_Demographics_Snapshot_Report_27754400000000_230724172438.xlsx"),
+#                             skip = 1)  # This file is only elementary schools and not  middle or high
 
 
 south.monterey <- read_csv(here("data","South_Monterey_county_joint_union_high_school.csv"))
+
+
+south.monterey.23.demo <- read_excel(here("data","somoco", "CAASPP_Student_Score_Data_File_EnrolledStudentScoreData_2023.xlsx") ,
+                                     skip = 1)
+
+
+south.monterey.23.demo <- south.monterey.23.demo %>%
+    mutate(Subject = case_match(RecordType,
+                                "01" ~ "ELA",
+                                "02" ~ "Math",
+                                "06" ~ "CAST"),
+           ScaleScoreAchievementLevel = AchievementLevels,
+           ScaleScore,
+           GradeLevelWhenAssessed = as.character(GradeAssessed),
+           AssessmentName = str_c("Grade ",GradeLevelWhenAssessed," ",Subject),
+    ) %>%
+    select(SSID,
+           CALPADSDistrictCode:CALPADSSchoolName,
+           Subject,
+           ScaleScoreAchievementLevel,
+           ScaleScore,
+           GradeLevelWhenAssessed,
+           AssessmentName,
+           
+           CALPADSIDEAIndicator:TwoorMoreRaces) %>%
+    filter(!is.na(ScaleScore)) %>%
+    rename(StudentIdentifier = SSID,
+           HispanicOrLatinoEthnicity = HispanicorLatino,
+           EL2 = ELStatus,
+           ELexit = RFEPDate,
+           SWD = CALPADSIDEAIndicator,
+           SED = EconomicDisadvantageStatus,
+           HOM = HomelessStatus,
+    ) %>%
+    mutate(EL = EL2,
+           ELdash = case_when(EL2 == "Yes" ~ "Yes",
+                              ymd(ELexit) >= ymd("2019-06-15") ~ "Yes",
+                              TRUE ~ "No"),
+           StudentIdentifier = as.numeric(StudentIdentifier)
+    ) %>%
+    select(-EL2,-ELexit) %>%
+    select(-ELEntryDate:-FosterStatus) %>%
+    relocate(HispanicOrLatinoEthnicity, .before = SWD) %>%
+    mutate(across(HispanicOrLatinoEthnicity:ELdash, ~na_if(., "No")))
+
+
+
+
+
+
+
 
 
 spreckels.23 <- read_csv(here("data", "spreckels" ,"SBAC 202223.csv"))
@@ -539,7 +606,7 @@ dfs <- function(df) {
 
 
 dfs(salinas.union.23.demo)
-
+dfs(south.monterey.23.demo)
  
  ### Student Group Size ------
 
@@ -612,7 +679,48 @@ studentsss <-     deparse(substitute(students))
   dfs2(santa.rita,EL) 
  dfs2(santa.rita, HispanicOrLatinoEthnicity)
  
+ 
+ ### Percent Meet or Exceed by Student group ------
+ 
+ 
+ pme2 <- function(df,students) {
+     
+     ddff <-     deparse(substitute(df)) 
+     studentsss <-     deparse(substitute(students))
+     
+     holder <-  df %>% 
+         filter(Subject %in% c("ELA","Math")) %>%
+         filter({{students}} == "Yes") %>%
+         mutate(ScaleScoreAchievementLevel = factor(ScaleScoreAchievementLevel),
+         ) %>%
+         left_join(reference2) %>%
+         group_by(Subject) %>%
+         mutate(met.exceed = ScaleScoreAchievementLevel >= 3 ,
+                met.exceed.perc = 100*mean(met.exceed))  %>%
+         select(Subject,met.exceed.perc ) %>%
+         distinct() %>%
+         mutate(district = ddff,
+                students = studentsss
+         )
+     
+     sheet_append(ss = sheet,
+                  sheet = "Percent Meet by Group",
+                  data = holder )
+     holder
+     
+ }
+ 
   
+ pme2(santa.rita,EL)
+ pme2(south.monterey.23.demo,HOM)
+ pme2(south.monterey.23.demo,SWD)
+ pme2(south.monterey.23.demo,SED)
+ pme2(south.monterey.23.demo,ELdash)
+ pme2(south.monterey.23.demo,EL)
+ pme2(south.monterey.23.demo,HispanicOrLatinoEthnicity)
+ 
+ 
+ 
   ### Student Growth in Year ----
   
   student.growth <- function(df.old, df.new, filename) {
@@ -942,16 +1050,16 @@ wash.22 <- wash.22 %>%
     filter(str_detect( DistrictName, "Washington"))
 
 
-wash.22 <- clean.df(wash.22) 
-king.city.23 <- clean.df(king.city.23) 
-king.city.23 <-  add.demo(king.city.23, king.city.23.demo)
+soledad.22 <- clean.df(soledad.22) 
+soledad.23 <- clean.df(soledad.23) 
+soledad.23 <-  add.demo(soledad.23, soledad.23.demo)
 
 
-  overall.graph(salinas.union.23.demo)
+  overall.graph(soledad.23)
   
-  graph.wrap(salinas.union.23.demo)
+  graph.wrap(soledad.23)
   
-  graph.grid(king.city.23)
+  graph.grid(soledad.23)
   
   save.overall(king.city.23)
   save.wrap(king.city.23)
@@ -960,26 +1068,26 @@ king.city.23 <-  add.demo(king.city.23, king.city.23.demo)
   
   elpi.change("Washington", wash.22, wash.23, "Washington ELPI 2023")
   
-  passing.perc(salinas.union.23.demo)
+  passing.perc(south.monterey.23.demo)
   
   
-  dfs(salinas.union.23.demo)
+  dfs(soledad.23)
   
-  student.group.size(salinas.union.23.demo) %>%
+  student.group.size(south.monterey.23.demo) %>%
       print(n=26)
   
   
-   dfs2(salinas.union.23.demo,White) 
-   dfs2(salinas.union.23.demo,ELdash) 
-   dfs2(salinas.union.23.demo,Asian) 
-       dfs2(salinas.union.23.demo,Filipino) 
-       dfs2(salinas.union.23.demo,TwoorMoreRaces) 
+#   dfs2(soledad.23,White) 
+   dfs2(south.monterey.23.demo,ELdash) 
+ #  dfs2(soledad.23,Asian) 
+   #    dfs2(soledad.23,Filipino) 
+  #     dfs2(soledad.23,TwoorMoreRaces) 
          # dfs2(gonzales,BlackOrAfricanAmerican) 
   # dfs2(gonzales,NativeHawaiianOrOtherPacificIslander) 
-   dfs2(salinas.union.23.demo,HispanicOrLatinoEthnicity) 
-   dfs2(salinas.union.23.demo,SWD) 
-   dfs2(salinas.union.23.demo,SED) 
-   dfs2(salinas.union.23.demo,HOM) 
+   dfs2(south.monterey.23.demo,HispanicOrLatinoEthnicity) 
+   dfs2(south.monterey.23.demo,SWD) 
+   dfs2(south.monterey.23.demo,SED) 
+   dfs2(south.monterey.23.demo,HOM) 
    
 
    
@@ -1129,7 +1237,12 @@ soledad2 %>%
                TwoorMoreRaces = TwoOrMoreRaces) %>%
         filter(str_detect(DistrictName,"King City")) 
    
-
+    # USe for Soledad or others
+    school.split <-  soledad.23 %>%
+        rename(CALPADSSchoolName = SchoolName,
+               CALPADSSchoolCode = SchoolId,
+               TwoorMoreRaces = TwoOrMoreRaces) %>%
+        filter(str_detect(DistrictName,"Soledad")) 
     
     # Used as basis for graphing in DFS student group Graph
    
@@ -1216,7 +1329,6 @@ ggsave(here("output",paste0("Lagunita Race ", Sys.Date(),".png")), width = 12, h
 
 ### Comparison to prior year by grade ----
 
-library(MCOE)
 
 
 comp.grade.year <- function(df22,df23, assessment = "Math", dist) {
@@ -1309,12 +1421,16 @@ comp.grade.year.meet.exceed(spreckels.22, spreckels.23, "ELA", "Spreckels")
 
 ### Calculate by grade level and student group  ----
 
-nmc.23 %>%
+pg.23 %>%
     filter(Subject %in% c("ELA","Math")) %>%
-   filter(EL == "Yes") %>%    
+ #  filter(EL == "Yes") %>%    
     group_by(Subject, GradeLevelWhenAssessed) %>%
     mutate(Above = ifelse(ScaleScoreAchievementLevel >= 3, TRUE, FALSE),
            perc = mean(Above)*100) %>%
     select(Subject, perc)  %>%
     distinct() %>%
     print(n=38)
+
+
+
+
