@@ -282,24 +282,24 @@ dfs.comp.school <- function(df, cds, assessment = "ELA", limit.case.count = TRUE
                                             count < 30 ~ "White",
                     
                                         # High Schools
-                                          str_detect(ent,"High School") & Test == "ELA" & DFS.x <=-45.1 & change <= 2.9 ~ "Red",
+                                          str_detect(ent,"High School") & Test == "ELA" & DFS.x <=-45.1 & change <= 2.99 ~ "Red",
                                           str_detect(ent,"High School") & Test == "ELA" & DFS.x <=-45.1 & change >= 3.0 ~ "Orange",
-                                          str_detect(ent,"High School") & Test == "ELA" & DFS.x <=-0.1 & change <= 2.9 ~ "Orange",
+                                          str_detect(ent,"High School") & Test == "ELA" & DFS.x <=-0.1 & change <= 2.99 ~ "Orange",
                                           str_detect(ent,"High School") & Test == "ELA" & DFS.x <=-0.1 & change >= 3.0 ~ "Yellow",    
-                                          str_detect(ent,"High School") & Test == "ELA" & DFS.x <=29.9 & change <= 2.9 ~ "Yellow",
+                                          str_detect(ent,"High School") & Test == "ELA" & DFS.x <=29.9 & change <= 2.99 ~ "Yellow",
                                           str_detect(ent,"High School") & Test == "ELA" & DFS.x <=29.9 & change >= 3.0 ~ "Green",
-                                          str_detect(ent,"High School") & Test == "ELA" & DFS.x <=74.9 & change <= 14.9 ~ "Green",
+                                          str_detect(ent,"High School") & Test == "ELA" & DFS.x <=74.9 & change <= 14.99 ~ "Green",
                                           str_detect(ent,"High School") & Test == "ELA" & DFS.x <=74.9 & change >= 15.0 ~ "Blue",           
                                           str_detect(ent,"High School") & Test == "ELA" & DFS.x >=75.0 & change <= -3.0 ~ "Green",
                                           str_detect(ent,"High School") & Test == "ELA" & DFS.x >=75.0 & change  >= -3.0 ~ "Blue",
                                           
-                                          str_detect(ent,"High School") & Test == "Math" & DFS.x <=-115.1 & change <= 2.9 ~ "Red",
+                                          str_detect(ent,"High School") & Test == "Math" & DFS.x <=-115.1 & change <= 2.99 ~ "Red",
                                           str_detect(ent,"High School") & Test == "Math" & DFS.x <=-115.1 & change >= 3.0 ~ "Orange",
-                                          str_detect(ent,"High School") & Test == "Math" & DFS.x <=-60.1 & change <= 2.9 ~ "Orange",
+                                          str_detect(ent,"High School") & Test == "Math" & DFS.x <=-60.1 & change <= 2.99 ~ "Orange",
                                           str_detect(ent,"High School") & Test == "Math" & DFS.x <=-60.1 & change >= 3.0 ~ "Yellow",    
-                                          str_detect(ent,"High School") & Test == "Math" & DFS.x <=-0.1 & change <= 2.9 ~ "Yellow",
+                                          str_detect(ent,"High School") & Test == "Math" & DFS.x <=-0.1 & change <= 2.99 ~ "Yellow",
                                           str_detect(ent,"High School") & Test == "Math" & DFS.x <=-0.1 & change >= 3.0 ~ "Green",
-                                          str_detect(ent,"High School") & Test == "Math" & DFS.x <=24.9 & change <= 14.9 ~ "Green",
+                                          str_detect(ent,"High School") & Test == "Math" & DFS.x <=24.9 & change <= 14.99 ~ "Green",
                                           str_detect(ent,"High School") & Test == "Math" & DFS.x <=24.9 & change >= 15.0 ~ "Blue",           
                                           str_detect(ent,"High School") & Test == "Math" & DFS.x >=25.0 & change <= -3.0 ~ "Green",
                                           str_detect(ent,"High School") & Test == "Math" & DFS.x >=25.0 & change  >= -3.0 ~ "Blue",
@@ -387,7 +387,7 @@ temp %>% dfs.comp.school.graph()
 
 
 
-temp <- dfs.comp.school(df = holder, cds = school.list[4], assessment = "ELA", limit.case.count = FALSE) %>% 
+temp <- dfs.comp.school(df = holder, cds = school.list[1], assessment = "Math", limit.case.count = FALSE) %>% 
     dfs.comp.school.graph()
 
 
@@ -396,14 +396,14 @@ temp <- dfs.comp.school(df = holder, cds = school.list[4], assessment = "ELA", l
 school.list <- holder$CDS %>% unique()
 
 
-for (i in 1:9) {
+for (i in 4:4) {
     
-dfs.comp.school(df = holder, cds = school.list[i], assessment = "Math", limit.case.count = FALSE) %>% 
+dfs.comp.school(df = holder, cds = school.list[i], assessment = "Math", limit.case.count = TRUE) %>% 
     dfs.comp.school.graph()
     
     ggsave(here("output",paste0(school.list[i], " - ","Math"," CAASPP Student Group Results 2022 and 2023 Comparison ", Sys.Date(),".png")), width = 8, height = 5)
     
-    dfs.comp.school(df = holder, cds = school.list[i], assessment = "ELA", limit.case.count = FALSE) %>% 
+    dfs.comp.school(df = holder, cds = school.list[i], assessment = "ELA", limit.case.count = TRUE) %>% 
         dfs.comp.school.graph()
     
     ggsave(here("output",paste0(school.list[i], " - ","ELA"," CAASPP Student Group Results 2022 and 2023 Comparison ", Sys.Date(),".png")), width = 8, height = 5)

@@ -720,6 +720,23 @@ studentsss <-     deparse(substitute(students))
  pme2(south.monterey.23.demo,HispanicOrLatinoEthnicity)
  
  
+ south.monterey.23.demo %>%
+     filter(str_detect(CALPADSSchoolName,"Portola")) %>%
+     pme2(HOM)
+ 
+ 
+ south.monterey.23.demo %>%
+     filter(str_detect(CALPADSSchoolName,"King")) %>%
+     passing.perc()
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
  
   ### Student Growth in Year ----
   
@@ -1228,7 +1245,10 @@ soledad2 %>%
     school.split <-  salinas.union.23.demo %>%
         filter(str_detect(CALPADSDistrictName,"Salinas Union")) 
    
-
+    
+    # Use for SoMoCo
+    school.split <-  south.monterey.23.demo %>%
+        filter(str_detect(CALPADSDistrictName,"South Monterey")) 
     
     # USe for King City or others
     school.split <-  king.city.23 %>%
