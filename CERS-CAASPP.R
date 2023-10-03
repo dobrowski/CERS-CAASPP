@@ -29,6 +29,50 @@ alisal.23.demo <- read_xlsx(here("data","alisal", "Alisal CAASPP_LEA_Student_Dem
                             skip = 1)
 
 
+bradley.23 <- read_xlsx(here("data","bradley", "statedata2.xlsx"),
+                     skip = 1)
+
+
+bradley.23 <- bradley.23 %>%
+    mutate(Subject = case_match(RecordType,
+                                "01" ~ "ELA",
+                                "02" ~ "Math",
+                                "06" ~ "CAST"),
+           ScaleScoreAchievementLevel = AchievementLevels,
+           ScaleScore,
+           GradeLevelWhenAssessed = GradeAssessed,
+           AssessmentName = str_c("Grade ",GradeLevelWhenAssessed," ",Subject),
+    ) %>%
+    select(SSID,
+           CALPADSDistrictCode:CALPADSSchoolName,
+           Subject,
+           ScaleScoreAchievementLevel,
+           ScaleScore,
+           GradeLevelWhenAssessed,
+           AssessmentName,
+           
+           CALPADSIDEAIndicator:TwoorMoreRaces) %>%
+    filter(!is.na(ScaleScore)) %>%
+    rename(StudentIdentifier = SSID,
+           HispanicOrLatinoEthnicity = HispanicorLatino,
+           EL2 = ELStatus,
+           ELexit = RFEPDate,
+           SWD = CALPADSIDEAIndicator,
+           SED = EconomicDisadvantageStatus,
+           HOM = HomelessStatus,
+    ) %>%
+    mutate(ELdash = case_when(EL2 == "Yes" ~ "Yes",
+                              ymd(ELexit) >= ymd("2019-06-15") ~ "Yes",
+                              TRUE ~ "No"),
+           StudentIdentifier = as.numeric(StudentIdentifier)
+    ) %>%
+    select(-EL2,-ELexit) %>%
+    select(-ELEntryDate:-FosterStatus) %>%
+    relocate(HispanicOrLatinoEthnicity, .before = SWD) %>%
+    mutate(across(HispanicOrLatinoEthnicity:ELdash, ~na_if(., "No")))
+
+
+
 gonzales.23 <- read_csv(here("data","gonz","Gonzales2023.csv"))
 gonzales.22 <- read_csv(here("data","Gonzales District_and_School_Export_File.csv"))
 
@@ -136,7 +180,62 @@ salinas.union.23.demo <- salinas.union.23.demo %>%
 #     distinct()
 
 
-san.antonio <- read_excel(here("data","SAUSDCAASPP2021-22.xlt" ))
+san.antonio.22 <- read_excel(here("data","SAUSDCAASPP2021-22.xlt" ))
+
+
+
+
+
+san.antonio.23 <- read_excel(here("data","san antonio", "27661670000000_CAASPP_Student_Score_Data_File_EnrolledStudentScoreData_2023.xlsx") ,
+                                     skip = 1)
+
+
+san.antonio.23 <- san.antonio.23 %>%
+    mutate(Subject = case_match(RecordType,
+                                "01" ~ "ELA",
+                                "02" ~ "Math",
+                                "06" ~ "CAST"),
+           ScaleScoreAchievementLevel = AchievementLevels,
+           ScaleScore,
+           GradeLevelWhenAssessed = as.character(GradeAssessed),
+           AssessmentName = str_c("Grade ",GradeLevelWhenAssessed," ",Subject),
+    ) %>%
+    select(SSID,
+           CALPADSDistrictCode:CALPADSSchoolName,
+           Subject,
+           ScaleScoreAchievementLevel,
+           ScaleScore,
+           GradeLevelWhenAssessed,
+           AssessmentName,
+           
+           CALPADSIDEAIndicator:TwoorMoreRaces) %>%
+    filter(!is.na(ScaleScore)) %>%
+    rename(StudentIdentifier = SSID,
+           HispanicOrLatinoEthnicity = HispanicorLatino,
+           EL2 = ELStatus,
+           ELexit = RFEPDate,
+           SWD = CALPADSIDEAIndicator,
+           SED = EconomicDisadvantageStatus,
+           HOM = HomelessStatus,
+    ) %>%
+    mutate(EL = EL2,
+           ELdash = case_when(EL2 == "Yes" ~ "Yes",
+                              ymd(ELexit) >= ymd("2019-06-15") ~ "Yes",
+                              TRUE ~ "No"),
+           StudentIdentifier = as.numeric(StudentIdentifier)
+    ) %>%
+    select(-EL2,-ELexit) %>%
+    select(-ELEntryDate:-FosterStatus) %>%
+    relocate(HispanicOrLatinoEthnicity, .before = SWD) %>%
+    mutate(across(HispanicOrLatinoEthnicity:ELdash, ~na_if(., "No")))
+
+
+
+
+
+
+
+
 
 
 san.ardo.23 <- read_csv(here("data", "san ardo" ,"sanardoCAASPP_2022_2023_report.csv"))
@@ -150,7 +249,37 @@ san.lucas.22 <- read_csv(here("data","San_Lucas_District_and_School_Export_File.
 san.lucas.23 <- read_csv(here("data", "san lucas" ,"San_Lucas_USD2023.csv"))
 
 
-santa.rita <- read_csv(here("data","Santa_Rita_District_and_School_Export_File CAASP assessments 2021-2022.csv"))
+santa.rita.22 <- read_csv(here("data","Santa_Rita_District_and_School_Export_File CAASP assessments 2021-2022.csv"))
+sr.elem.23.math <- read_sheet("https://docs.google.com/spreadsheets/d/1izuOr7QNjf3zYBJsw254aExohG12FivyxrUMqSiM0HE/edit#gid=0",
+                            sheet = "SR Math") %>%
+    mutate(StudentIdentifier = row_number()+1000000000,
+           Subject = "Math",
+           CALPADSSchoolName = "Santa Rita Elementary",
+           CALPADSSchoolCode = 27661916026660)
+sr.elem.23.ela <- read_sheet("https://docs.google.com/spreadsheets/d/1izuOr7QNjf3zYBJsw254aExohG12FivyxrUMqSiM0HE/edit#gid=0",
+                                 sheet = "SR ELA ")%>%
+    mutate(StudentIdentifier = row_number()+1000000000,
+           Subject = "ELA",
+           CALPADSSchoolName = "Santa Rita Elementary",
+           CALPADSSchoolCode = 27661916026660)
+gv.mid.23.math <- read_sheet("https://docs.google.com/spreadsheets/d/1izuOr7QNjf3zYBJsw254aExohG12FivyxrUMqSiM0HE/edit#gid=0",
+                              sheet = "GV Math") %>%
+    mutate(StudentIdentifier = row_number()+1000000000,
+           Subject = "Math",
+           CALPADSSchoolName = "Gavilan View",
+           CALPADSSchoolCode = 27661916102925)
+
+gv.mid.23.ela <- read_sheet("https://docs.google.com/spreadsheets/d/1izuOr7QNjf3zYBJsw254aExohG12FivyxrUMqSiM0HE/edit#gid=0",
+                             sheet = "GV ELA")%>%
+    mutate(StudentIdentifier = row_number()+1000000000,
+           Subject = "ELA",
+           CALPADSSchoolName = "Gavilan View",
+           CALPADSSchoolCode = 27661916102925)
+
+sr.combo.23 <- bind_rows(sr.elem.23.math, sr.elem.23.ela, gv.mid.23.math, gv.mid.23.ela)
+
+
+
 
 
 soledad.22 <- read_csv(here("data","Soledad_District_and_School_Export_File.csv"))
@@ -536,9 +665,11 @@ hold
 
 passing.perc(santa.rita)
 
-salinas.city.23 %>%
-    filter(SWD == "Yes") %>%
+soledad.23 %>%
+    filter(SWD == "Yes",
+           GradeLevelWhenAssessed == "05") %>%
     passing.perc()
+
     
 
 
@@ -711,7 +842,6 @@ studentsss <-     deparse(substitute(students))
  }
  
   
- pme2(santa.rita,EL)
  pme2(south.monterey.23.demo,HOM)
  pme2(south.monterey.23.demo,SWD)
  pme2(south.monterey.23.demo,SED)
@@ -1067,44 +1197,43 @@ wash.22 <- wash.22 %>%
     filter(str_detect( DistrictName, "Washington"))
 
 
-soledad.22 <- clean.df(soledad.22) 
-soledad.23 <- clean.df(soledad.23) 
+gonzales.22 <- clean.df(gonzales.22) 
+gonzales.23 <- clean.df(gonzales.23) 
 soledad.23 <-  add.demo(soledad.23, soledad.23.demo)
 
 
-  overall.graph(soledad.23)
+  overall.graph(san.antonio.23)
   
-  graph.wrap(soledad.23)
+  graph.wrap(san.antonio.23)
   
-  graph.grid(soledad.23)
+  graph.grid(san.antonio.23)
   
-  save.overall(king.city.23)
-  save.wrap(king.city.23)
-  save.grid(king.city.23)
+  save.overall(san.antonio.23)
+  save.wrap(san.antonio.23)
+  save.grid(san.antonio.23)
   
   
   elpi.change("Washington", wash.22, wash.23, "Washington ELPI 2023")
   
-  passing.perc(south.monterey.23.demo)
+  passing.perc(san.antonio.23)
   
   
-  dfs(soledad.23)
+  dfs(san.antonio.23)
   
-  student.group.size(south.monterey.23.demo) %>%
-      print(n=26)
+  student.group.size(san.antonio.23) 
   
   
-#   dfs2(soledad.23,White) 
-   dfs2(south.monterey.23.demo,ELdash) 
+   dfs2(san.antonio.23,White) 
+ #  dfs2(san.antonio.23,ELdash) 
  #  dfs2(soledad.23,Asian) 
    #    dfs2(soledad.23,Filipino) 
   #     dfs2(soledad.23,TwoorMoreRaces) 
          # dfs2(gonzales,BlackOrAfricanAmerican) 
   # dfs2(gonzales,NativeHawaiianOrOtherPacificIslander) 
-   dfs2(south.monterey.23.demo,HispanicOrLatinoEthnicity) 
-   dfs2(south.monterey.23.demo,SWD) 
-   dfs2(south.monterey.23.demo,SED) 
-   dfs2(south.monterey.23.demo,HOM) 
+   dfs2(san.antonio.23,HispanicOrLatinoEthnicity) 
+ #  dfs2(san.antonio.23,SWD) 
+   dfs2(san.antonio.23,SED) 
+ #  dfs2(san.antonio.23,HOM) 
    
 
    
@@ -1244,7 +1373,19 @@ soledad2 %>%
    # Use for SUHSD
     school.split <-  salinas.union.23.demo %>%
         filter(str_detect(CALPADSDistrictName,"Salinas Union")) 
-   
+    
+    # Use for Santa Rita schools
+    school.split <-  sr.combo.23 %>%
+        rename(ScaleScoreAchievementLevel = AchievementLevels,
+                ELdash = ELStatus,
+               HispanicOrLatinoEthnicity = HispanicorLatino,
+               SWD = IDEAIndicatorforTesting,
+               SED = EconomicDisadvantageTesting,
+               HOM = HomelessStatus) %>%
+        mutate(GradeLevelWhenAssessed = str_pad(GradeAssessed, 2, "left", "0" )
+        ) %>%
+        filter(!is.na(ScaleScore))
+    
     
     # Use for SoMoCo
     school.split <-  south.monterey.23.demo %>%
@@ -1454,3 +1595,4 @@ pg.23 %>%
 
 
 
+### END ---------
