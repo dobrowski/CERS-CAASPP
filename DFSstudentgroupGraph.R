@@ -63,9 +63,9 @@ dfs.graph(dist = "soledad.23",
           dist.name = "Soledad")
 
 
-dfs.graph(dist = "gonzales.23",
+dfs.graph(dist = "mcoe.alt.ed.23",
           assessment = "ELA",
-          dist.name = "Gonzales")
+          dist.name = "MCOE Alt Ed")
 
 
 
@@ -197,9 +197,9 @@ dfs.comp(dist = "soledad.23",
           dist.name = "Soledad")
 
 
-dfs.comp(dist = "wash.23",
-          assessment = "Math",
-          dist.name = "Washington Union")
+dfs.comp(dist = "nmc.23",
+          assessment = "ELA",
+          dist.name = "North Monterey County")
 
 
 
@@ -208,8 +208,13 @@ dfs.comp(dist = "bradley.23",
          dist.name = "Bradley")
 
 dfs.comp(dist = "san.antonio.23",
-         assessment = "Math",
+         assessment = "ELA",
          dist.name = "San Antonio")
+
+
+dfs.comp(dist = "chualar.23",
+          assessment = "ELA",
+          dist.name = "Chualar")
 
 
 
@@ -421,7 +426,7 @@ temp <- dfs.comp.school(df = holder, cds = school.list[1], assessment = "Math", 
 school.list <- holder$CDS %>% unique()
 
 
-for (i in 1:2) {
+for (i in 1:5) {
     
 dfs.comp.school(df = holder, cds = school.list[i], assessment = "Math", limit.case.count = TRUE) %>% 
     dfs.comp.school.graph()

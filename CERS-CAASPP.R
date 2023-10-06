@@ -22,18 +22,9 @@ sheet <- "https://docs.google.com/spreadsheets/d/1E7x2W-bWkZGenZTPVmlyGSl0LQPfrH
 
 ### Load files -----
 
-
-alisal.23 <- read_csv(here("data","alisal","ELPI_2023_Estimate.csv"))
-alisal.22 <- read_csv(here("data","Alisal USD - District_and_School_Export_File.7.13.2022.csv"))
-alisal.23.demo <- read_xlsx(here("data","alisal", "Alisal CAASPP_LEA_Student_Demographics_Snapshot_Report_27659610000000_230724131757.xlsx"),
-                            skip = 1)
-
-
-bradley.23 <- read_xlsx(here("data","bradley", "statedata2.xlsx"),
-                     skip = 1)
-
-
-bradley.23 <- bradley.23 %>%
+use.TOMS <- function(df) {
+    
+ df %>%
     mutate(Subject = case_match(RecordType,
                                 "01" ~ "ELA",
                                 "02" ~ "Math",
@@ -71,6 +62,27 @@ bradley.23 <- bradley.23 %>%
     relocate(HispanicOrLatinoEthnicity, .before = SWD) %>%
     mutate(across(HispanicOrLatinoEthnicity:ELdash, ~na_if(., "No")))
 
+}
+
+
+
+
+alisal.23 <- read_csv(here("data","alisal","ELPI_2023_Estimate.csv"))
+alisal.22 <- read_csv(here("data","Alisal USD - District_and_School_Export_File.7.13.2022.csv"))
+alisal.23.demo <- read_xlsx(here("data","alisal", "Alisal CAASPP_LEA_Student_Demographics_Snapshot_Report_27659610000000_230724131757.xlsx"),
+                            skip = 1)
+
+
+bradley.23 <- read_xlsx(here("data","bradley", "statedata2.xlsx"),
+                     skip = 1)
+bradley.23 <- use.TOMS(bradley.23)
+
+
+chualar.23 <- read_xlsx(here("data","chualar", "27659950000000_CAASPP_Student_Score_Data_File_EnrolledStudentScoreData_2023.xlsx"),
+                        skip = 1)
+chualar.23 <- use.TOMS(chualar.23)
+
+
 
 
 gonzales.23 <- read_csv(here("data","gonz","Gonzales2023.csv"))
@@ -95,6 +107,22 @@ king.city.23.demo <- king.city.23.demo %>%
 
 lagunita.23 <- read_csv(here("data", "lagunita" ,"District_and_School_Export_File LAGUNITA 2023.csv"))
 # lagunita <- read_csv(here("data","LAgunita.csv"))
+
+
+
+mcoe.23 <- read_xlsx(here("data","mcoe", "27102720000000_CAASPP_Student_Score_Data_File_TestedStudentScoreData_2023.xlsx"),
+                        skip = 1)
+mcoe.23 <- use.TOMS(mcoe.23)
+mcoe.alt.ed.23 <- mcoe.23 %>%
+    filter(!str_detect(CALPADSSchoolName,"Charter"),
+           !str_detect(CALPADSSchoolName,"Special"),
+           !str_detect(CALPADSSchoolName,"High")
+    )
+
+alt.elpi.23 <- read_csv(here("data", "mcoe" ,"AltEd2023.csv"))
+alt.elpi.22 <- read_csv(here("data", "mcoe" ,"AltEd2022.csv"))
+
+
 
 mpusd <- read_csv(here("data","MPUSD_CAASPP_21-22.csv"))
 
@@ -190,47 +218,7 @@ san.antonio.23 <- read_excel(here("data","san antonio", "27661670000000_CAASPP_S
                                      skip = 1)
 
 
-san.antonio.23 <- san.antonio.23 %>%
-    mutate(Subject = case_match(RecordType,
-                                "01" ~ "ELA",
-                                "02" ~ "Math",
-                                "06" ~ "CAST"),
-           ScaleScoreAchievementLevel = AchievementLevels,
-           ScaleScore,
-           GradeLevelWhenAssessed = as.character(GradeAssessed),
-           AssessmentName = str_c("Grade ",GradeLevelWhenAssessed," ",Subject),
-    ) %>%
-    select(SSID,
-           CALPADSDistrictCode:CALPADSSchoolName,
-           Subject,
-           ScaleScoreAchievementLevel,
-           ScaleScore,
-           GradeLevelWhenAssessed,
-           AssessmentName,
-           
-           CALPADSIDEAIndicator:TwoorMoreRaces) %>%
-    filter(!is.na(ScaleScore)) %>%
-    rename(StudentIdentifier = SSID,
-           HispanicOrLatinoEthnicity = HispanicorLatino,
-           EL2 = ELStatus,
-           ELexit = RFEPDate,
-           SWD = CALPADSIDEAIndicator,
-           SED = EconomicDisadvantageStatus,
-           HOM = HomelessStatus,
-    ) %>%
-    mutate(EL = EL2,
-           ELdash = case_when(EL2 == "Yes" ~ "Yes",
-                              ymd(ELexit) >= ymd("2019-06-15") ~ "Yes",
-                              TRUE ~ "No"),
-           StudentIdentifier = as.numeric(StudentIdentifier)
-    ) %>%
-    select(-EL2,-ELexit) %>%
-    select(-ELEntryDate:-FosterStatus) %>%
-    relocate(HispanicOrLatinoEthnicity, .before = SWD) %>%
-    mutate(across(HispanicOrLatinoEthnicity:ELdash, ~na_if(., "No")))
-
-
-
+san.antonio.23 <- use.TOMS(san.antonio.23)
 
 
 
@@ -743,7 +731,7 @@ dfs(south.monterey.23.demo)
 
 # Calculates with student groups are large enough to appear on dashboard
  
- student.group.size <- function(df) {
+ student.group.size <- function(df, limit.30 = TRUE) {
      
  df %>%
 #         mutate(EL = ifelse(EnglishLanguageAcquisitionStatus == "EL", "Yes", NA)) %>%
@@ -753,11 +741,11 @@ dfs(south.monterey.23.demo)
          # pivot_longer(cols = c(HispanicOrLatinoEthnicity:Filipino,EL)) %>%
          summarise( across(c(HispanicOrLatinoEthnicity:ELdash), ~  sum(!is.na(.)))) %>%
          pivot_longer(cols = c(HispanicOrLatinoEthnicity:ELdash)) %>%
-     filter(value >= 30 | name == "HOM" & value >= 15)
+         filter(if(limit.30 == TRUE )value >= 30 | name == "HOM" & value >= 15 else value >= 1) 
  }
 
  
- student.group.size(san.lucas) 
+ student.group.size(san.antonio.23, limit.30 = FALSE) %>% print(n = 30)
  
  
  ### Records ----
@@ -1093,6 +1081,7 @@ student.growth(wash.22,wash.23, "Washington 2023 Student Scale Score Change")
  
  elpi.change("San Ardo", san.ardo.22, san.ardo.23, "San Ardo ELPI 2023")
  
+ elpi.change("Monterey County", alt.elpi.22, alt.elpi.23, "Alt Ed ELPI 2023")
  
   
  # alisal.elpac.21  <-  read_excel(here("data","ELPAC_for_ELPI_-_20_to_21_(Alisal_USD)_2020-21.xlsx") ) 
@@ -1197,43 +1186,43 @@ wash.22 <- wash.22 %>%
     filter(str_detect( DistrictName, "Washington"))
 
 
-gonzales.22 <- clean.df(gonzales.22) 
-gonzales.23 <- clean.df(gonzales.23) 
+chualar.23 <- clean.df(chualar.23) 
+mcoe.alt.ed.23 <- clean.df(mcoe.alt.ed.23) 
 soledad.23 <-  add.demo(soledad.23, soledad.23.demo)
 
 
-  overall.graph(san.antonio.23)
+  overall.graph(mcoe.alt.ed.23)
   
-  graph.wrap(san.antonio.23)
+  graph.wrap(mcoe.alt.ed.23)
   
-  graph.grid(san.antonio.23)
+  graph.grid(mcoe.alt.ed.23)
   
-  save.overall(san.antonio.23)
-  save.wrap(san.antonio.23)
-  save.grid(san.antonio.23)
+  save.overall(mcoe.alt.ed.23)
+  save.wrap(mcoe.alt.ed.23)
+  save.grid(mcoe.alt.ed.23)
   
   
   elpi.change("Washington", wash.22, wash.23, "Washington ELPI 2023")
   
-  passing.perc(san.antonio.23)
+  passing.perc(mcoe.alt.ed.23)
   
   
-  dfs(san.antonio.23)
+  dfs(mcoe.alt.ed.23)
   
   student.group.size(san.antonio.23) 
   
   
    dfs2(san.antonio.23,White) 
- #  dfs2(san.antonio.23,ELdash) 
+   dfs2(san.antonio.23,ELdash) 
  #  dfs2(soledad.23,Asian) 
    #    dfs2(soledad.23,Filipino) 
   #     dfs2(soledad.23,TwoorMoreRaces) 
          # dfs2(gonzales,BlackOrAfricanAmerican) 
   # dfs2(gonzales,NativeHawaiianOrOtherPacificIslander) 
    dfs2(san.antonio.23,HispanicOrLatinoEthnicity) 
- #  dfs2(san.antonio.23,SWD) 
-   dfs2(san.antonio.23,SED) 
- #  dfs2(san.antonio.23,HOM) 
+   dfs2(san.antonio.23,SWD) 
+   dfs2(san.antonio.23 ,SED) 
+   dfs2(san.antonio.23,HOM) 
    
 
    
@@ -1388,8 +1377,8 @@ soledad2 %>%
     
     
     # Use for SoMoCo
-    school.split <-  south.monterey.23.demo %>%
-        filter(str_detect(CALPADSDistrictName,"South Monterey")) 
+    school.split <-  mcoe.23 %>%
+        filter(str_detect(CALPADSDistrictName,"Monterey")) 
     
     # USe for King City or others
     school.split <-  king.city.23 %>%
@@ -1399,11 +1388,11 @@ soledad2 %>%
         filter(str_detect(DistrictName,"King City")) 
    
     # USe for Soledad or others
-    school.split <-  soledad.23 %>%
+    school.split <-  mcoe.alt.ed.23 %>%
         rename(CALPADSSchoolName = SchoolName,
                CALPADSSchoolCode = SchoolId,
                TwoorMoreRaces = TwoOrMoreRaces) %>%
-        filter(str_detect(DistrictName,"Soledad")) 
+        filter(str_detect(DistrictName,"Monterey")) 
     
     # Used as basis for graphing in DFS student group Graph
    
