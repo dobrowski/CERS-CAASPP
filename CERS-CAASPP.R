@@ -88,6 +88,10 @@ chualar.23 <- use.TOMS(chualar.23)
 gonzales.23 <- read_csv(here("data","gonz","Gonzales2023.csv"))
 gonzales.22 <- read_csv(here("data","Gonzales District_and_School_Export_File.csv"))
 
+gonzales.23 <- read_xlsx(here("data","gonz", "27754730000000_CAASPP_Student_Score_Data_File_TestedStudentScoreData_2023.xlsx"),
+                        skip = 1)
+gonzales.23 <- use.TOMS(gonzales.23)
+
 
 king.city.23 <- read_delim(here("data","king city","KCUSD_22.23.csv"))
 king.city.22 <- read_csv(here("data","KCUSD.csv")) 
@@ -1191,11 +1195,11 @@ mcoe.alt.ed.23 <- clean.df(mcoe.alt.ed.23)
 soledad.23 <-  add.demo(soledad.23, soledad.23.demo)
 
 
-  overall.graph(mcoe.alt.ed.23)
+  overall.graph(gonzales.23)
   
-  graph.wrap(mcoe.alt.ed.23)
+  graph.wrap(gonzales.23)
   
-  graph.grid(mcoe.alt.ed.23)
+  graph.grid(gonzales.23)
   
   save.overall(mcoe.alt.ed.23)
   save.wrap(mcoe.alt.ed.23)
@@ -1204,25 +1208,25 @@ soledad.23 <-  add.demo(soledad.23, soledad.23.demo)
   
   elpi.change("Washington", wash.22, wash.23, "Washington ELPI 2023")
   
-  passing.perc(mcoe.alt.ed.23)
+  passing.perc(gonzales.23)
   
   
-  dfs(mcoe.alt.ed.23)
+  dfs(gonzales.23)
   
-  student.group.size(san.antonio.23) 
+  student.group.size(gonzales.23) 
   
   
-   dfs2(san.antonio.23,White) 
-   dfs2(san.antonio.23,ELdash) 
+ #  dfs2(san.antonio.23,White) 
+   dfs2(gonzales.23,ELdash) 
  #  dfs2(soledad.23,Asian) 
    #    dfs2(soledad.23,Filipino) 
   #     dfs2(soledad.23,TwoorMoreRaces) 
          # dfs2(gonzales,BlackOrAfricanAmerican) 
   # dfs2(gonzales,NativeHawaiianOrOtherPacificIslander) 
-   dfs2(san.antonio.23,HispanicOrLatinoEthnicity) 
-   dfs2(san.antonio.23,SWD) 
-   dfs2(san.antonio.23 ,SED) 
-   dfs2(san.antonio.23,HOM) 
+   dfs2(gonzales.23,HispanicOrLatinoEthnicity) 
+   dfs2(gonzales.23,SWD) 
+   dfs2(gonzales.23 ,SED) 
+   dfs2(gonzales.23,HOM) 
    
 
    

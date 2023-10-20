@@ -216,6 +216,9 @@ dfs.comp(dist = "chualar.23",
           assessment = "ELA",
           dist.name = "Chualar")
 
+dfs.comp(dist = "gonzales.23",
+         assessment = "Math",
+         dist.name = "Gonzales")
 
 
 #### School level versions -------
